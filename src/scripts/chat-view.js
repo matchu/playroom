@@ -84,7 +84,7 @@ export default class ChatView {
       room,
       ownUserId: hydrogenSession.userId,
       platform: this.hydrogenPlatform,
-      // Omitting urlCreator and navigation, I don't want those!
+      urlCreator: { urlUntilSegment: () => "<not implemented>" },
     });
     await roomViewModel.load();
     const view = new TimelineView(roomViewModel.timelineViewModel);
