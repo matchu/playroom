@@ -45,20 +45,14 @@ export default class MatrixClient {
   }
 
   async loginAsGuest() {
-    let guestSessionData;
-    try {
-      guestSessionData = await this._post("/_matrix/client/v3/register", {
+    const guestSessionData = await this._post(
+      "/_matrix/client/v3/register?kind=guest",
+      {
         body: {
           initial_device_display_name: this.appName,
         },
-      });
-    } catch (error) {
-      if (error.responseStatus === 401 && error.responseData?.flows) {
-        throw new Error(`TODO: Captcha support`);
-      } else {
-        throw error;
       }
-    }
+    );
 
     return {
       accessToken: guestSessionData.access_token,
