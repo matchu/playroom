@@ -13,69 +13,66 @@ body {
   padding: 0;
 }
 
+/**
+ * chat-panel is the main chat container. It uses a single grid area, to size
+ * its content to its own full size.
+ */
 chat-panel {
   display: grid;
   grid-template-areas: "the-single-area";
   min-height: 100%;
 }
 
-chat-panel .hydrogen {
+/**
+ * The [status] attribute of chat-panel determines which content we show.
+ * It takes up the whole chat-panel area.
+ */
+chat-main,
+chat-loading-indicator,
+chat-error-indicator {
+  display: none;
   grid-area: the-single-area;
-  z-index: 1;
+}
+chat-panel[status="ready"] chat-main,
+chat-panel[status="loading"] chat-loading-indicator,
+chat-panel[status="error"] chat-error-indicator {
+  display: flex;
 }
 
-chat-loading-indicator {
-  grid-area: the-single-area;
-  z-index: 2;
-
-  display: flex;
+/**
+ * The loading and error indicators center their content.
+ */
+chat-loading-indicator,
+chat-error-indicator {
   flex-direction: column;
   justify-content: center;
   text-align: center;
-  font-size: 1.5em;
 }
 
-chat-panel:not([status="loading"]) chat-loading-indicator {
-  display: none;
-}
-
+/**
+ * Chat loading messages are hidden until the right loading-step.
+ * They also have big typographical styles!
+ */
 chat-loading-message {
   display: none;
+  font-size: 1.5em;
 }
-
 chat-panel[loading-step="loading"]
-  chat-loading-message[for-loading-step="loading"] {
-  display: block;
-}
-
+  chat-loading-message[for-loading-step="loading"],
 chat-panel[loading-step="logging-in"]
   chat-loading-message[for-loading-step="logging-in"] {
   display: block;
 }
 
-chat-error-indicator {
-  grid-area: the-single-area;
-
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  text-align: center;
-  font-size: 1.2em;
-}
-
+/**
+ * Chat error messages are hidden unless it's the right error-type.
+ * They also have big typographical styles!
+ */
 chat-error-message {
   display: none;
+  font-size: 1.2em;
 }
-
-chat-panel:not([status="error"]) chat-error-indicator {
-  display: none;
-}
-
 chat-panel[error-type="login-error"]
   chat-error-message[for-error-type="login-error"] {
   display: block;
-}
-
-chat-panel:not([status="ready"]) chat-main {
-  display: none;
 }
