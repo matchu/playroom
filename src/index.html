@@ -11,6 +11,7 @@
     <chat-panel
       status="loading"
       loading-step="loading"
+      v-scope
       v-bind:status="status"
       v-bind:loading-step="loadingStep"
       v-bind:error-type="errorType"
@@ -47,13 +48,19 @@
       <chat-main>
         <header>
           <h1>Chat</h1>
-          <display-name-form>
-            <form>
+          <display-name-form v-scope="DisplayNameForm()">
+            <form @submit="saveDisplayName">
               <label>
                 <div>Display name</div>
-                <input type="text" disabled required />
+                <input
+                  type="text"
+                  v-model="displayName"
+                  v-bind:disabled="isDisabled"
+                  required
+                  ref="displayNameInput"
+                />
               </label>
-              <button type="submit" disabled>Save</button>
+              <button type="submit" v-bind:disabled="isDisabled">Save</button>
             </form>
           </display-name-form>
         </header>

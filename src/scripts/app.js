@@ -1,3 +1,4 @@
+import DisplayNameForm from "./components/display-name-form";
 import PlayroomModel from "./data/playroom-model";
 import HydrogenBridge from "./hydrogen-bridge";
 import { createApp } from "./lib/petite-vue";
@@ -7,11 +8,13 @@ function mountPlayroomApp({ container, roomId }) {
   const hydrogenBridge = new HydrogenBridge(container);
 
   createApp({
+    playroom,
     roomId,
     status: "loading",
     loadingStep: "loading",
     errorType: null,
     termsUrl: "/terms-placeholder.html",
+    DisplayNameForm: () => DisplayNameForm({ playroom }),
 
     async login() {
       this.loadingStep = "logging-in";
@@ -61,7 +64,7 @@ function mountPlayroomApp({ container, roomId }) {
       this.status = "error";
       this.errorType = "login-error";
     },
-  }).mount(container);
+  }).mount();
 }
 
 document.addEventListener("DOMContentLoaded", async () => {

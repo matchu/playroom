@@ -1,3 +1,4 @@
+import { reactive } from "../lib/petite-vue";
 import MatrixClient from "./matrix-client";
 
 export default class PlayroomModel {
@@ -7,22 +8,28 @@ export default class PlayroomModel {
     this._matrix = new MatrixClient({
       homeserver: this.roomId.split(":")[1],
     });
-    this._session = null;
+    this.state = reactive({
+      _session: null,
+      displayName: null,
+    });
   }
 
   async loginAsSavedSessionOrGuest() {
     // First, read the saved session, or create a new empty one.
-    this._session = this._readSavedSession() || {};
+    this.state._session = this._readSavedSession() || {};
 
     // If it doesn't have a Matrix session, create one.
-    if (!this._session.matrix) {
-      this._session.matrix = await this._createGuestMatrixSession();
+    if (!this.state._session.matrix) {
+      this.state._session = {
+        ...this.state._session,
+        matrix: await this._createGuestMatrixSession(),
+      };
     }
 
     // Then, save the session in storage for next time.
     localStorage.setItem(
       "playroom-matrix-session",
-      JSON.stringify(this._session)
+      JSON.stringify(this.state._session)
     );
 
     // Finally, make sure the account is all set up, then return.
@@ -130,17 +137,17 @@ export default class PlayroomModel {
   }
 
   async getDisplayName() {
-    if (!this._cachedDisplayName) {
+    if (!this.state.displayName) {
       const { accessToken, userId } = this.getMatrixSessionData();
 
       const displayNameData = await this._matrix.get(
         `/_matrix/client/v3/profile/${encodeURIComponent(userId)}/displayname`,
         { accessToken }
       );
-      this._cachedDisplayName = displayNameData.displayname;
+      this.state.displayName = displayNameData.displayname;
     }
 
-    return this._cachedDisplayName;
+    return this.state.displayName;
   }
 
   async setDisplayName(newDisplayName) {
@@ -154,7 +161,7 @@ export default class PlayroomModel {
       }
     );
 
-    this._cachedDisplayName = newDisplayName;
+    this.state.displayName = newDisplayName;
   }
 
   /**
@@ -170,7 +177,7 @@ export default class PlayroomModel {
    * Playroom owner may have made.
    */
   getMatrixSessionData() {
-    return this._session.matrix;
+    return this.state._session.matrix;
   }
 }
 
