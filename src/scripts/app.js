@@ -5,9 +5,12 @@ class App {
   constructor({ container, roomId }) {
     this.container = container;
     this.roomId = roomId;
-    // TODO: Infer homeserver from roomId!
-    this.client = new PlayroomModel({ roomId });
-    this.chatView = new ChatView({ container, client: this.client, roomId });
+    this.playroom = new PlayroomModel({ roomId });
+    this.chatView = new ChatView({
+      container,
+      playroom: this.playroom,
+      roomId,
+    });
   }
 
   async start() {
@@ -18,7 +21,7 @@ class App {
 
   async login() {
     try {
-      const session = await this.client.loginAsSavedSessionOrGuest();
+      const session = await this.playroom.loginAsSavedSessionOrGuest();
       await this.chatView.useSession(session);
     } catch (error) {
       // The ChatView will display the error, and potentially retry the login

@@ -1,7 +1,7 @@
 export default class DisplayNameForm {
-  constructor({ container, client }) {
+  constructor({ container, playroom }) {
     this.container = container;
-    this.client = client;
+    this.playroom = playroom;
 
     this.state = { session: null, displayName: null, isSubmitting: false };
 
@@ -21,7 +21,7 @@ export default class DisplayNameForm {
 
   async useSession(session) {
     this.session = session;
-    this.state.displayName = await this.client.getDisplayName(session);
+    this.state.displayName = await this.playroom.getDisplayName(session);
     this.update();
   }
 
@@ -44,7 +44,7 @@ export default class DisplayNameForm {
     this.state.isSubmitting = true;
     this.update();
 
-    await this.client.setDisplayName({ accessToken, userId, newDisplayName });
+    await this.playroom.setDisplayName({ accessToken, userId, newDisplayName });
 
     this.state.isSubmitting = false;
     this.textField.blur();

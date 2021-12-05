@@ -2,13 +2,13 @@ import DisplayNameForm from "./chat-view/display-name-form";
 import HydrogenBridge from "./hydrogen-bridge";
 
 export default class ChatView {
-  constructor({ container, client, roomId }) {
+  constructor({ container, playroom, roomId }) {
     this.container = container;
     this.roomId = roomId;
     this.hydrogenBridge = new HydrogenBridge(this.container);
     this.displayNameForm = new DisplayNameForm({
       container: this.container.querySelector("display-name-form"),
-      client,
+      playroom,
     });
   }
 
