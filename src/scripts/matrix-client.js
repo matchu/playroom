@@ -86,6 +86,28 @@ export default class MatrixClient {
       body: JSON.stringify(body),
     });
 
+    return await this._handleResponse(path, response);
+  }
+
+  // TODO: This should probably unify with _post more, but I'm tired :p
+  async _put(path, { body = {}, accessToken = null } = {}) {
+    const url = await this._getUrlOnHomeserver(path);
+    const headers = { "Content-Type": "application/json" };
+
+    if (accessToken != null) {
+      headers.Authorization = `Bearer ${accessToken}`;
+    }
+
+    const response = await fetch(url, {
+      method: "PUT",
+      headers,
+      body: JSON.stringify(body),
+    });
+
+    return await this._handleResponse(path, response);
+  }
+
+  async _handleResponse(path, response) {
     let data;
 
     const newRejection = (message) => {
@@ -180,8 +202,8 @@ export default class MatrixClient {
       }
     );
 
+    // Then, build it into a session object for the rest of the app.
     const homeserverBaseUrl = await this._getHomeserverBaseUrl();
-
     const session = {
       accessToken: guestSessionData.access_token,
       deviceId: guestSessionData.device_id,
@@ -189,9 +211,48 @@ export default class MatrixClient {
       homeserverBaseUrl: homeserverBaseUrl.toString().slice(0, -1),
     };
 
+    // Then, give it a friendly display name.
+    const funDisplayName = generateFunDisplayName();
+    await this._put(
+      `/_matrix/client/v3/profile/${encodeURIComponent(session.userId)}` +
+        `/displayname`,
+      {
+        accessToken: session.accessToken,
+        body: { displayname: funDisplayName },
+      }
+    );
+
     // Save the session for next time!
     localStorage.setItem("playroom-matrix-session", JSON.stringify(session));
 
     return session;
   }
+}
+
+// TODO: These should probably be configurable lol
+const FUN_DISPLAY_NAME_NOUNS = [
+  "Snail",
+  "Duck",
+  "Cherry",
+  "Raymond",
+  "Mote",
+  "Sparkles",
+  "Daisy",
+  "Dark Knight",
+  "Thinker",
+  "Alicorn",
+  "Blossom",
+  "Chestnut",
+  "Flopsy",
+  "Dynamo",
+  "Lake",
+];
+
+function generateFunDisplayName() {
+  const noun =
+    FUN_DISPLAY_NAME_NOUNS[
+      Math.floor(Math.random() * FUN_DISPLAY_NAME_NOUNS.length)
+    ];
+  const letter = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"[Math.floor(Math.random() * 26)];
+  return `${noun} ${letter} (guest)`;
 }
