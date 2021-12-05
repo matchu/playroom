@@ -6,76 +6,85 @@ import {
   TimelineView,
 } from "hydrogen-web";
 
-export async function buildHydrogenTimelineView(roomId, session, container) {
-  // First, initialize the Hydrogen "platform", the layer that helps it do
-  // Web stuff.
-  const platform = new Platform(container, {});
-
-  // Then, clear out all existing Hydrogen sessions, just for clarity and
-  // space efficiency.
-  const sessions = await platform.sessionInfoStorage.getAll();
-  for (const session of sessions) {
-    await platform.sessionInfoStorage.delete(session.id);
+export default class HydrogenBridge {
+  constructor(container) {
+    // First, initialize the Hydrogen "platform", the layer that helps it do
+    // Web stuff.
+    this.platform = new Platform(container, {});
+    this.sessionContainer = new SessionContainer({
+      platform: this.platform,
+    });
+    monkeyPatchSessionContainer(this.sessionContainer);
   }
 
-  // Then, drop the new session into the Hydrogen platform's session storage.
-  // (Session ID code copied from Hydrogen's SessionContainer source!)
-  const sessionId = Math.floor(
-    Math.random() * Number.MAX_SAFE_INTEGER
-  ).toString();
-  await platform.sessionInfoStorage.add({
-    id: sessionId,
-    deviceId: session.deviceId,
-    userId: session.userId,
-    homeServer: session.homeserverBaseUrl,
-    homeserver: session.homeserverBaseUrl,
-    accessToken: session.accessToken,
-    lastUsed: new Date(),
-  });
+  async startWithExistingSession(session) {
+    // First, clear out all existing Hydrogen sessions, just for clarity and
+    // space efficiency.
+    const sessions = await this.platform.sessionInfoStorage.getAll();
+    for (const session of sessions) {
+      await this.platform.sessionInfoStorage.delete(session.id);
+    }
 
-  // Then, create a new Hydrogen "session container" that will try to load
-  // the session by ID. The `loadStatus` code is from the SDK.md docs:
-  // https://github.com/vector-im/hydrogen-web/blob/82aac93f362b3fba95ffbff9749e9b0375d4bcf0/doc/SDK.md
-  const sessionContainer = new SessionContainer({
-    platform: platform,
-  });
-  monkeyPatchSessionContainer(sessionContainer);
-  sessionContainer.startWithExistingSession(sessionId);
-  await sessionContainer.loadStatus.waitFor(
-    (status) =>
-      status === LoadStatus.Ready ||
-      status === LoadStatus.Error ||
-      status === LoadStatus.LoginFailed
-  ).promise;
+    // Then, drop the new session into the Hydrogen platform's session storage.
+    // (Session ID code copied from Hydrogen's SessionContainer source!)
+    const sessionId = Math.floor(
+      Math.random() * Number.MAX_SAFE_INTEGER
+    ).toString();
+    await this.platform.sessionInfoStorage.add({
+      id: sessionId,
+      deviceId: session.deviceId,
+      userId: session.userId,
+      homeServer: session.homeserverBaseUrl,
+      homeserver: session.homeserverBaseUrl,
+      accessToken: session.accessToken,
+      lastUsed: new Date(),
+    });
 
-  // Check how the login went! If it went poorly, throw an eror.
-  if (sessionContainer.loginFailure) {
-    throw new Error(
-      `[ChatView] Hydrogen login failed: ` + `${sessionContainer.loginFailure}`
-    );
-  } else if (sessionContainer.loadError) {
-    throw new Error(
-      `[ChatView] Hydrogen login error: ` +
-        `${sessionContainer.loadError.message}`
-    );
+    // Then, create a new Hydrogen "session container" that will try to load
+    // the session by ID. The `loadStatus` code is from the SDK.md docs:
+    // https://github.com/vector-im/hydrogen-web/blob/82aac93f362b3fba95ffbff9749e9b0375d4bcf0/doc/SDK.md
+    this.sessionContainer.startWithExistingSession(sessionId);
+    await this.sessionContainer.loadStatus.waitFor(
+      (status) =>
+        status === LoadStatus.Ready ||
+        status === LoadStatus.Error ||
+        status === LoadStatus.LoginFailed
+    ).promise;
+
+    // Check how the login went! If it went poorly, throw an error. Otherwise,
+    // return successfully!
+    if (this.sessionContainer.loginFailure) {
+      throw new Error(
+        `[ChatView] Hydrogen login failed: ` +
+          `${this.sessionContainer.loginFailure}`
+      );
+    } else if (this.sessionContainer.loadError) {
+      throw new Error(
+        `[ChatView] Hydrogen login error: ` +
+          `${this.sessionContainer.loadError.message}`
+      );
+    }
   }
 
-  // Then, build a Hydrogen view for this room.
-  const hydrogenSession = sessionContainer.session;
-  const room = hydrogenSession.rooms.get(roomId);
-  if (!room) {
-    throw new Error(
-      `[ChatView] Hydrogen could not find room with ID ${roomId}`
-    );
+  async createTimelineView(roomId) {
+    const hydrogenSession = this.sessionContainer.session;
+    const room = hydrogenSession.rooms.get(roomId);
+    if (!room) {
+      throw new Error(
+        `[ChatView] Hydrogen could not find room with ID ${roomId}`
+      );
+    }
+
+    const roomViewModel = new RoomViewModel({
+      room,
+      ownUserId: hydrogenSession.userId,
+      platform: this.platform,
+      urlCreator: { urlUntilSegment: () => "<not implemented>" },
+    });
+    await roomViewModel.load();
+
+    return new TimelineView(roomViewModel.timelineViewModel);
   }
-  const roomViewModel = new RoomViewModel({
-    room,
-    ownUserId: hydrogenSession.userId,
-    platform: platform,
-    urlCreator: { urlUntilSegment: () => "<not implemented>" },
-  });
-  await roomViewModel.load();
-  return new TimelineView(roomViewModel.timelineViewModel);
 }
 
 // Monkey-patch syncing for compatibility with guest accounts.
