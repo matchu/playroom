@@ -90,3 +90,38 @@ chat-panel[error-type="must-agree-to-terms"]
   chat-error-message[for-error-type="must-agree-to-terms"] {
   display: block;
 }
+
+/**
+ * The chat header sits above the main chat area, with settings etc.
+ */
+chat-main header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 16px;
+}
+
+/**
+ * The chat title should be large, but not as large as most h1s.
+ */
+chat-main header h1 {
+  font-size: 1.4em;
+}
+
+/**
+ * The "Display name" form flows horizontally.
+ */
+chat-main header form {
+  display: flex;
+  gap: 0.25em;
+  align-items: flex-end;
+}
+
+/**
+ * Add some space between the "Display name" label and the input!
+ */
+chat-main header form label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25em;
+}
