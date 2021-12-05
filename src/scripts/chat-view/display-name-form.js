@@ -22,9 +22,8 @@ export default class DisplayNameForm {
   async useSession(session) {
     this.session = session;
     const displayNameData = await this.client._get(
-      `/_matrix/client/v3/profile/${encodeURIComponent(
-        session.userId
-      )}/displayname`,
+      `/_matrix/client/v3/profile` +
+        `/${encodeURIComponent(session.userId)}/displayname`,
       { accessToken: session.accessToken }
     );
     this.state.displayName = displayNameData.displayname;
