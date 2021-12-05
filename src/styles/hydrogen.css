@@ -1,0 +1,13 @@
+@import url("npm:hydrogen-web/src/platform/web/ui/css/main.css");
+@import url("npm:hydrogen-web/src/platform/web/ui/css/themes/element/theme.css");
+
+/* TODO: Temp hack for flexbox, will remove once using RoomView? */
+#chat {
+  display: flex;
+  flex-direction: column;
+  height: 90vh; /* TODO */
+}
+
+#chat .Timeline {
+  flex: 1 0 0;
+}
