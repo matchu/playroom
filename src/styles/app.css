@@ -18,6 +18,46 @@ a {
 }
 
 /**
+ * The playroom app has two main areas: a video panel, and a chat panel.
+ */
+playroom-app {
+  display: grid;
+  grid-template-areas: "video chat";
+  grid-template-columns: 50% 50%;
+  height: 100%;
+}
+video-panel {
+  grid-area: video;
+}
+chat-panel {
+  grid-area: chat;
+}
+
+/**
+ * The video panel has a dark background. It will be covered by the iframe once
+ * it loads.
+ */
+video-panel {
+  background: #223;
+}
+
+/**
+ * The embedded iframe takes up the whole area.
+ */
+video-panel iframe {
+  width: 100%;
+  height: 100%;
+}
+
+/**
+ * The iframe is hidden until it has a src specified, retrieved from the
+ * backend.
+ */
+video-panel iframe:not([src]) {
+  display: none;
+}
+
+/**
  * chat-panel is the main chat container. It uses a single grid area, to size
  * its content to its own full size.
  */
@@ -37,9 +77,9 @@ chat-error-indicator {
   display: none;
   grid-area: the-single-area;
 }
-chat-panel[status="ready"] chat-main,
-chat-panel[status="loading"] chat-loading-indicator,
-chat-panel[status="error"] chat-error-indicator {
+playroom-app[status="ready"] chat-main,
+playroom-app[status="loading"] chat-loading-indicator,
+playroom-app[status="error"] chat-error-indicator {
   display: flex;
 }
 
@@ -69,9 +109,9 @@ chat-loading-message {
   display: none;
   font-size: 1.5em;
 }
-chat-panel[loading-step="loading"]
+playroom-app[loading-step="loading"]
   chat-loading-message[for-loading-step="loading"],
-chat-panel[loading-step="logging-in"]
+playroom-app[loading-step="logging-in"]
   chat-loading-message[for-loading-step="logging-in"] {
   display: block;
 }
@@ -84,9 +124,9 @@ chat-error-message {
   display: none;
   font-size: 1.2em;
 }
-chat-panel[error-type="login-error"]
+playroom-app[error-type="login-error"]
   chat-error-message[for-error-type="login-error"],
-chat-panel[error-type="must-agree-to-terms"]
+playroom-app[error-type="must-agree-to-terms"]
   chat-error-message[for-error-type="must-agree-to-terms"] {
   display: block;
 }
