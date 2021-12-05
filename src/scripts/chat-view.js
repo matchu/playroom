@@ -20,8 +20,7 @@ export default class ChatView {
 
     // Finally, mount the view in the .hydrogen element, and hide the loading
     // UI.
-    const chatMainElement = this.container.querySelector("chat-main");
-    chatMainElement.innerHTML = "";
+    const chatMainElement = this.container.querySelector("chat-main .hydrogen");
     chatMainElement.appendChild(view.mount());
   }
 }

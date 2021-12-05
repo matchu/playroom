@@ -44,11 +44,19 @@ chat-panel[status="error"] chat-error-indicator {
 }
 
 /**
+ * All three content areas are column flex containers.
+ */
+chat-main,
+chat-loading-indicator,
+chat-error-indicator {
+  flex-direction: column;
+}
+
+/**
  * The loading and error indicators center their content.
  */
 chat-loading-indicator,
 chat-error-indicator {
-  flex-direction: column;
   justify-content: center;
   text-align: center;
 }
