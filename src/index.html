@@ -8,7 +8,14 @@
     <script type="module" src="scripts/app.js"></script>
   </head>
   <body>
-    <chat-panel status="loading" loading-step="loading">
+    <chat-panel
+      status="loading"
+      loading-step="loading"
+      v-bind:status="status"
+      v-bind:loading-step="loadingStep"
+      v-bind:error-type="errorType"
+      @mounted="login"
+    >
       <chat-loading-indicator>
         <chat-loading-message for-loading-step="loading">
           Loading…

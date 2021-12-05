@@ -8,5 +8,6 @@
     "ecmaVersion": 13,
     "sourceType": "module"
   },
+  "ignorePatterns": "src/scripts/lib/*.js",
   "rules": {}
 }

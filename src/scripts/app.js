@@ -1,34 +1,27 @@
-import ChatView from "./chat-view";
 import PlayroomModel from "./data/playroom-model";
+import { createApp } from "./lib/petite-vue";
 
-class App {
-  constructor({ container, roomId }) {
-    this.container = container;
-    this.roomId = roomId;
-    this.playroom = new PlayroomModel({ roomId });
-    this.chatView = new ChatView({
-      container,
-      playroom: this.playroom,
-      roomId,
-    });
-  }
-
-  async start() {
-    this.chatView.start();
-    this.chatView.showLoggingInState();
-    await this.login();
-  }
-
-  async login() {
-    try {
-      await this.playroom.loginAsSavedSessionOrGuest();
-      await this.chatView.handleLoginSuccess();
-    } catch (error) {
-      // The ChatView will display the error, and potentially retry the login
-      // if it becomes appropriate.
-      this.chatView.handleLoginError(error, () => this.login());
-    }
-  }
+function mountPlayroomApp({ container, roomId }) {
+  createApp({
+    roomId,
+    playroom: new PlayroomModel({ roomId }),
+    status: "loading",
+    loadingStep: "loading",
+    errorType: null,
+    async login() {
+      this.loadingStep = "logging-in";
+      try {
+        await this.playroom.loginAsSavedSessionOrGuest();
+        this.status = "ready";
+        this.loadingStep = null;
+      } catch (error) {
+        console.error(error);
+        // TODO: terms & retry
+        this.status = "error";
+        this.errorType = "login-error";
+      }
+    },
+  }).mount(container);
 }
 
 document.addEventListener("DOMContentLoaded", async () => {
@@ -50,9 +43,5 @@ document.addEventListener("DOMContentLoaded", async () => {
     return;
   }
 
-  const app = new App({ container, roomId });
-
-  console.debug("App", app);
-
-  await app.start();
+  mountPlayroomApp({ container, roomId });
 });
