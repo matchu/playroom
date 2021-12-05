@@ -8,7 +8,9 @@ export default class ChatView {
   }
 
   mount() {
-    this.container.innerText = "Logging in…";
+    this.container
+      .querySelector(".chat-loading-message")
+      ?.setAttribute("data-status", "logging-in");
   }
 
   async useSession(session) {
@@ -18,12 +20,11 @@ export default class ChatView {
     // Then, build a Hydrogen TimelineView for this room.
     const view = await this.hydrogenBridge.createRoomView(this.roomId);
 
-    // Finally, mount the view. We'll also wrap it in an additional .hydrogen
-    // element, which Hydrogen looks for as a container sometimes.
-    this.container.innerHTML = "";
-    const hydrogenContainer = document.createElement("div");
-    hydrogenContainer.className = "hydrogen";
-    this.container.appendChild(hydrogenContainer);
-    hydrogenContainer.appendChild(view.mount());
+    // Finally, mount the view in the .hydrogen element, and hide the loading
+    // UI.
+    this.container.querySelector(".hydrogen").appendChild(view.mount());
+    this.container
+      .querySelector(".chat-loading-message")
+      ?.setAttribute("data-status", "ready");
   }
 }
