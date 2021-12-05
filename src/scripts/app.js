@@ -49,16 +49,21 @@ class App {
 
   handleConsentError(error) {
     const links = this.container.querySelectorAll(
-      "a[href$='terms-placeholder.html']"
+      "a[href$='terms-placeholder.html'], a[data-terms-url-was-replaced]"
     );
     if (links.length === 0) {
       throw new Error(`could not find terms-placeholder.html link to replace`);
     }
     for (const link of links) {
       link.href = error.consentUrl;
+      link.setAttribute("data-terms-url-was-replaced", "true");
     }
     this.container.setAttribute("status", "error");
     this.container.setAttribute("error-type", "must-agree-to-terms");
+
+    // Try again in 3 seconds. If the user hasn't agreed to the terms yet, we
+    // should end up back here in a loop until they do.
+    setTimeout(() => this.login(), 3000);
   }
 }
 
