@@ -73,6 +73,7 @@ export default class ChatView {
       );
     }
 
+    // Then, build a Hydrogen view for this room.
     const hydrogenSession = this.sessionContainer.session;
     const room = hydrogenSession.rooms.get(this.roomId);
     if (!room) {
@@ -88,7 +89,13 @@ export default class ChatView {
     });
     await roomViewModel.load();
     const view = new TimelineView(roomViewModel.timelineViewModel);
-    this.container.appendChild(view.mount());
+
+    // Finally, mount the view. We'll also wrap it in an additional .hydrogen
+    // element, which Hydrogen looks for as a container sometimes.
+    const hydrogenContainer = document.createElement("div");
+    hydrogenContainer.className = "hydrogen";
+    this.container.appendChild(hydrogenContainer);
+    hydrogenContainer.appendChild(view.mount());
   }
 }
 

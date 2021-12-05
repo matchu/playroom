@@ -1,13 +1,17 @@
 @import url("npm:hydrogen-web/src/platform/web/ui/css/main.css");
 @import url("npm:hydrogen-web/src/platform/web/ui/css/themes/element/theme.css");
 
+.Timeline_messageAvatar {
+  display: none;
+}
+
 /* TODO: Temp hack for flexbox, will remove once using RoomView? */
-#chat {
+.hydrogen {
   display: flex;
   flex-direction: column;
   height: 90vh; /* TODO */
 }
 
-#chat .Timeline {
+.hydrogen > .Timeline {
   flex: 1 0 0;
 }
