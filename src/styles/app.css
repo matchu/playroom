@@ -22,8 +22,6 @@ a {
  */
 playroom-app {
   display: grid;
-  grid-template-areas: "video chat";
-  grid-template-columns: 50% 50%;
   height: 100%;
 }
 video-panel {
@@ -31,6 +29,31 @@ video-panel {
 }
 chat-panel {
   grid-area: chat;
+}
+
+/**
+ * On wide screens, the video and chat areas are a horizontal two-column view.
+ */
+@media (min-width: 1025px) {
+  playroom-app {
+    grid-template-areas: "video chat";
+    grid-template-columns: 1fr 450px;
+  }
+}
+
+/**
+ * On narrow screens, the video and chat areas are vertically stacked as two
+ * rows. We give it a min-height, so that instead of scrunching if it gets too
+ * small, it gets a scroll bar.
+ */
+@media (max-width: 1024px) {
+  playroom-app {
+    grid-template-areas:
+      "video"
+      "chat";
+    grid-template-rows: 50% 50%;
+    min-height: 400px;
+  }
 }
 
 /**
