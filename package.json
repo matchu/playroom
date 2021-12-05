@@ -17,6 +17,7 @@
   "source": "src/index.html",
   "scripts": {
     "start": "parcel",
+    "build": "parcel build",
     "lint": "eslint src"
   },
   "author": "Matchu",
