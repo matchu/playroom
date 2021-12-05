@@ -8,7 +8,6 @@ function mountPlayroomApp({ container, roomId }) {
   const hydrogenBridge = new HydrogenBridge(container);
 
   createApp({
-    playroom,
     roomId,
     status: "loading",
     loadingStep: "loading",
@@ -28,19 +27,14 @@ function mountPlayroomApp({ container, roomId }) {
     },
 
     async _handleLoginSuccess() {
-      // First, wait for Hydrogen to set itself up for this session.
+      // Set up Hydrogen with the new session, then load and mount the view.
       await hydrogenBridge.startWithExistingSession(
         playroom.getMatrixSessionData()
       );
-
-      // Then, build a Hydrogen TimelineView for this room.
       const view = await hydrogenBridge.createRoomView(roomId);
+      this.$refs.hydrogenRoomView.appendChild(view.mount());
 
-      // Finally, mount the view in the .hydrogen element…
-      const chatMainElement = container.querySelector("chat-main .hydrogen");
-      chatMainElement.appendChild(view.mount());
-
-      // …and show the app! We're ready now!
+      // Okay, we're ready now! Show the app!
       this.status = "ready";
       this.loadingStep = null;
     },
