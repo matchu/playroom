@@ -2,14 +2,12 @@ import ChatView from "./chat-view";
 import MatrixClient from "./matrix-client";
 
 async function startApp() {
+  const container = document.querySelector("chat-panel");
   const roomId = document.querySelector(
     "meta[name='playroom:room-id']"
   ).content;
 
-  const chatView = new ChatView({
-    container: document.querySelector("chat-panel"),
-    roomId,
-  });
+  const chatView = new ChatView({ container, roomId });
   chatView.mount();
   console.debug("ChatView", chatView);
 
@@ -23,11 +21,14 @@ async function startApp() {
       window.open(error.consentUrl);
     }
     console.error(error);
-    document.querySelector("#alert").setAttribute("data-status", "error");
-    document.querySelector("#alert").innerText =
-      `We're having trouble logging you into chat, sorry 😖 ` +
-      `See the browser console for details!`;
+
+    container.setAttribute("status", "error");
+    container.setAttribute("error-type", "login-error");
+    return;
   }
+
+  container.setAttribute("status", "ready");
+  container.removeAttribute("loading-step");
 }
 
 startApp().catch((error) => console.error(error));

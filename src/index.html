@@ -8,17 +8,22 @@
     <script type="module" src="scripts/app.js"></script>
   </head>
   <body>
-    <div id="alert"></div>
-    <chat-panel status="loading">
+    <chat-panel status="loading" loading-step="loading">
       <chat-loading-indicator>
-        <chat-loading-message for-status="loading">
+        <chat-loading-message for-loading-step="loading">
           Loading…
         </chat-loading-message>
-        <chat-loading-message for-status="logging-in">
+        <chat-loading-message for-loading-step="logging-in">
           Logging in…
         </chat-loading-message>
       </chat-loading-indicator>
-      <div class="hydrogen"></div>
+      <chat-error-indicator>
+        <chat-error-message for-error-type="login-error">
+          <p>We're having trouble logging you into chat, sorry 😖</p>
+          <p>You can come find me and ask me for help if it keeps happening!</p>
+        </chat-error-message>
+      </chat-error-indicator>
+      <chat-main class="hydrogen"></chat-main>
     </chat-panel>
   </body>
 </html>

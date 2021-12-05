@@ -8,7 +8,7 @@ export default class ChatView {
   }
 
   mount() {
-    this.container.setAttribute("status", "logging-in");
+    this.container.setAttribute("loading-step", "logging-in");
   }
 
   async useSession(session) {
@@ -20,7 +20,8 @@ export default class ChatView {
 
     // Finally, mount the view in the .hydrogen element, and hide the loading
     // UI.
-    this.container.querySelector(".hydrogen").appendChild(view.mount());
-    this.container.setAttribute("status", "ready");
+    const chatMainElement = this.container.querySelector("chat-main");
+    chatMainElement.innerHTML = "";
+    chatMainElement.appendChild(view.mount());
   }
 }
