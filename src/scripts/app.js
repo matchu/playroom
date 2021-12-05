@@ -8,6 +8,8 @@ function mountPlayroomApp({ container, roomId }) {
     status: "loading",
     loadingStep: "loading",
     errorType: null,
+    termsUrl: "/terms-placeholder.html",
+
     async login() {
       this.loadingStep = "logging-in";
       try {
@@ -16,10 +18,28 @@ function mountPlayroomApp({ container, roomId }) {
         this.loadingStep = null;
       } catch (error) {
         console.error(error);
-        // TODO: terms & retry
-        this.status = "error";
-        this.errorType = "login-error";
+        this._handleLoginError(error);
       }
+    },
+
+    _handleLoginError(error) {
+      if (error.termsUrl) {
+        try {
+          this.status = "error";
+          this.errorType = "must-agree-to-terms";
+          this.termsUrl = error.termsUrl;
+          setTimeout(() => this.login(), 3000);
+          return;
+        } catch (error2) {
+          console.warn(
+            `Could not show terms prompt, showing generic error instead`,
+            error2
+          );
+        }
+      }
+
+      this.status = "error";
+      this.errorType = "login-error";
     },
   }).mount(container);
 }

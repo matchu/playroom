@@ -28,8 +28,12 @@ export default class PlayroomModel {
     // Finally, make sure the account is all set up, then return.
     // (We set display name before joining, to avoid a "user changed their
     // name" message appearing in chat the first time they join.)
-    await this._ensureDisplayName();
-    await this._ensureJoinedRoom();
+    try {
+      await this._ensureDisplayName();
+      await this._ensureJoinedRoom();
+    } catch (error) {
+      throw this._wrapAccountSetupError(error);
+    }
   }
 
   _readSavedSession() {
@@ -93,6 +97,36 @@ export default class PlayroomModel {
       `/_matrix/client/v3/join/${encodeURIComponent(this.roomId)}`,
       { accessToken }
     );
+  }
+
+  _wrapAccountSetupError(error) {
+    // Check if this is a Terms & Conditions consent error. If so, handle
+    // it specially, so the app can help the user resolve it.
+    if (
+      error.responseStatus === 403 &&
+      error.responseData?.errcode === "M_CONSENT_NOT_GIVEN"
+    ) {
+      const consentMatch = error.responseData?.error?.match(
+        /you must review and agree to our terms and conditions at (https:\/\/\S+)\.$/
+      );
+      if (consentMatch) {
+        // This is specific to the Synapse consent implementation.
+        // matrix.org uses this, so I expect it to be helpful for a lot of
+        // folks deploying from scratch!
+        const termsError = new Error(
+          `[PlayroomModel] User must agree to the terms & conditions first`
+        );
+        termsError.termsUrl = consentMatch[1];
+        return termsError;
+      } else {
+        console.warn(
+          `[PlayroomModel] Received M_CONSENT_NOT_GIVEN error, but it didn't match the error message format. Leaving as-is.`,
+          error
+        );
+      }
+    }
+
+    return error;
   }
 
   async getDisplayName() {

@@ -108,29 +108,6 @@ export default class MatrixClient {
 
     if (!response.ok) {
       if (data.errcode && data.error) {
-        // Check if this is a Terms & Conditions consent error. If so, handle
-        // it specially, so the app can help the user resolve it.
-        if (response.status === 403 && data.errcode === "M_CONSENT_NOT_GIVEN") {
-          const consentMatch = data.error.match(
-            /you must review and agree to our terms and conditions at (https:\/\/\S+)\.$/
-          );
-          if (consentMatch) {
-            // This is specific to the Synapse consent implementation.
-            // matrix.org uses this, so I expect it to be helpful for a lot of
-            // folks deploying from scratch!
-            const error = new Error(
-              `User must agree to the terms & conditions first`
-            );
-            error.consentUrl = consentMatch[1];
-            throw error;
-          } else {
-            console.warn(
-              `Received M_CONSENT_NOT_GIVEN error, but it didn't match the error message format. Re-throwing.`,
-              data
-            );
-          }
-        }
-
         throw newRejection(`${data.errcode} - ${data.error}`);
       } else {
         throw newRejection(`(Response JSON was not an error message)`);
