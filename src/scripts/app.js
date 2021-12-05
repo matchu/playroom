@@ -19,6 +19,9 @@ async function startApp() {
     await chatView.useSession(session);
     console.debug("MatrixClient", client);
   } catch (error) {
+    if (error.consentUrl) {
+      window.open(error.consentUrl);
+    }
     console.error(error);
     document.querySelector("#alert").setAttribute("data-status", "error");
     document.querySelector("#alert").innerText =
