@@ -11,7 +11,7 @@ class App {
   }
 
   async start() {
-    this.chatView.mount();
+    this.chatView.showLoggingInState();
     await this.login();
   }
 
@@ -20,50 +20,10 @@ class App {
       const session = await this.client.loginAsSavedSessionOrGuest();
       await this.chatView.useSession(session);
     } catch (error) {
-      this.handleLoginError(error);
-      return;
+      // The ChatView will display the error, and potentially retry the login
+      // if it becomes appropriate.
+      this.chatView.handleLoginError(error, () => this.login());
     }
-
-    this.container.setAttribute("status", "ready");
-    this.container.removeAttribute("loading-step");
-  }
-
-  handleLoginError(error) {
-    console.error(error);
-
-    if (error.consentUrl) {
-      try {
-        this.handleConsentError(error);
-        return;
-      } catch (error2) {
-        console.warn(
-          `Could not show consent prompt, showing generic error instead`,
-          error2
-        );
-      }
-    }
-
-    this.container.setAttribute("status", "error");
-    this.container.setAttribute("error-type", "login-error");
-  }
-
-  handleConsentError(error) {
-    const links = this.container.querySelectorAll(
-      "a[href$='terms-placeholder.html'], a[data-terms-url-was-replaced]"
-    );
-    if (links.length === 0) {
-      throw new Error(`could not find terms-placeholder.html link to replace`);
-    }
-    for (const link of links) {
-      link.href = error.consentUrl;
-      link.setAttribute("data-terms-url-was-replaced", "true");
-    }
-    this.container.setAttribute("status", "error");
-    this.container.setAttribute("error-type", "must-agree-to-terms");
-
-    // Try again in 3 seconds. If the user hasn't agreed to the terms yet, we
-    // should end up back here in a loop until they do.
-    setTimeout(() => this.login(), 3000);
   }
 }
 
