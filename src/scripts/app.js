@@ -5,12 +5,13 @@ class App {
   constructor({ container, roomId }) {
     this.container = container;
     this.roomId = roomId;
-    this.chatView = new ChatView({ container, roomId });
     // TODO: Infer homeserver from roomId!
     this.client = new MatrixClient({ homeserver: "matrix.org", roomId });
+    this.chatView = new ChatView({ container, client: this.client, roomId });
   }
 
   async start() {
+    this.chatView.start();
     this.chatView.showLoggingInState();
     await this.login();
   }

@@ -111,7 +111,7 @@ chat-main header h1 {
 /**
  * The "Display name" form flows horizontally.
  */
-chat-main header form {
+display-name-form form {
   display: flex;
   gap: 0.25em;
   align-items: flex-end;
@@ -120,7 +120,7 @@ chat-main header form {
 /**
  * Add some space between the "Display name" label and the input!
  */
-chat-main header form label {
+display-name-form label {
   display: flex;
   flex-direction: column;
   gap: 0.25em;

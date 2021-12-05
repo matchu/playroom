@@ -1,10 +1,19 @@
+import DisplayNameForm from "./chat-view/display-name-form";
 import HydrogenBridge from "./hydrogen-bridge";
 
 export default class ChatView {
-  constructor({ container, roomId }) {
+  constructor({ container, client, roomId }) {
     this.container = container;
     this.roomId = roomId;
     this.hydrogenBridge = new HydrogenBridge(this.container);
+    this.displayNameForm = new DisplayNameForm({
+      container: this.container.querySelector("display-name-form"),
+      client,
+    });
+  }
+
+  start() {
+    this.displayNameForm.start();
   }
 
   showLoggingInState() {
@@ -24,6 +33,9 @@ export default class ChatView {
     chatMainElement.appendChild(view.mount());
     this.container.setAttribute("status", "ready");
     this.container.removeAttribute("loading-step");
+
+    // And tell our children about it, too.
+    await this.displayNameForm.useSession(session);
   }
 
   handleLoginError(error, retry) {

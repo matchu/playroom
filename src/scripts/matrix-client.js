@@ -72,42 +72,26 @@ export default class MatrixClient {
     return new URL(path, baseUrl);
   }
 
-  async _post(path, { body = {}, accessToken = null } = {}) {
+  async _request(
+    path,
+    { body = null, accessToken = null, method = "GET" } = {}
+  ) {
     const url = await this._getUrlOnHomeserver(path);
-    const headers = { "Content-Type": "application/json" };
+    const headers = {};
 
+    if (body != null) {
+      headers["Content-Type"] = "application/json";
+    }
     if (accessToken != null) {
       headers.Authorization = `Bearer ${accessToken}`;
     }
 
     const response = await fetch(url, {
-      method: "POST",
+      method,
       headers,
-      body: JSON.stringify(body),
+      body: body ? JSON.stringify(body) : null,
     });
 
-    return await this._handleResponse(path, response);
-  }
-
-  // TODO: This should probably unify with _post more, but I'm tired :p
-  async _put(path, { body = {}, accessToken = null } = {}) {
-    const url = await this._getUrlOnHomeserver(path);
-    const headers = { "Content-Type": "application/json" };
-
-    if (accessToken != null) {
-      headers.Authorization = `Bearer ${accessToken}`;
-    }
-
-    const response = await fetch(url, {
-      method: "PUT",
-      headers,
-      body: JSON.stringify(body),
-    });
-
-    return await this._handleResponse(path, response);
-  }
-
-  async _handleResponse(path, response) {
     let data;
 
     const newRejection = (message) => {
@@ -159,6 +143,18 @@ export default class MatrixClient {
     }
 
     return data;
+  }
+
+  async _get(path, options = {}) {
+    return await this._request(path, { ...options, method: "GET" });
+  }
+
+  async _post(path, options = {}) {
+    return await this._request(path, { ...options, method: "POST" });
+  }
+
+  async _put(path, options = {}) {
+    return await this._request(path, { ...options, method: "PUT" });
   }
 
   async loginAsSavedSessionOrGuest() {
@@ -213,19 +209,26 @@ export default class MatrixClient {
 
     // Then, give it a friendly display name.
     const funDisplayName = generateFunDisplayName();
-    await this._put(
-      `/_matrix/client/v3/profile/${encodeURIComponent(session.userId)}` +
-        `/displayname`,
-      {
-        accessToken: session.accessToken,
-        body: { displayname: funDisplayName },
-      }
-    );
+    await this.setDisplayName({
+      accessToken: session.accessToken,
+      userId: session.userId,
+      newDisplayName: funDisplayName,
+    });
 
     // Save the session for next time!
     localStorage.setItem("playroom-matrix-session", JSON.stringify(session));
 
     return session;
+  }
+
+  async setDisplayName({ accessToken, userId, newDisplayName }) {
+    await this._put(
+      `/_matrix/client/v3/profile/${encodeURIComponent(userId)}/displayname`,
+      {
+        accessToken,
+        body: { displayname: newDisplayName },
+      }
+    );
   }
 }
 
