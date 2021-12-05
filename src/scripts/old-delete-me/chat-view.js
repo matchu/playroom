@@ -1,5 +1,5 @@
 import DisplayNameForm from "./chat-view/display-name-form";
-import HydrogenBridge from "./hydrogen-bridge";
+import HydrogenBridge from "../hydrogen-bridge";
 
 export default class ChatView {
   constructor({ container, playroom, roomId }) {

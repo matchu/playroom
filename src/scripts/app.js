@@ -1,10 +1,13 @@
 import PlayroomModel from "./data/playroom-model";
+import HydrogenBridge from "./hydrogen-bridge";
 import { createApp } from "./lib/petite-vue";
 
 function mountPlayroomApp({ container, roomId }) {
+  const playroom = new PlayroomModel({ roomId });
+  const hydrogenBridge = new HydrogenBridge(container);
+
   createApp({
     roomId,
-    playroom: new PlayroomModel({ roomId }),
     status: "loading",
     loadingStep: "loading",
     errorType: null,
@@ -13,13 +16,30 @@ function mountPlayroomApp({ container, roomId }) {
     async login() {
       this.loadingStep = "logging-in";
       try {
-        await this.playroom.loginAsSavedSessionOrGuest();
-        this.status = "ready";
-        this.loadingStep = null;
+        await playroom.loginAsSavedSessionOrGuest();
+        this._handleLoginSuccess();
       } catch (error) {
         console.error(error);
         this._handleLoginError(error);
       }
+    },
+
+    async _handleLoginSuccess() {
+      // First, wait for Hydrogen to set itself up for this session.
+      await hydrogenBridge.startWithExistingSession(
+        playroom.getMatrixSessionData()
+      );
+
+      // Then, build a Hydrogen TimelineView for this room.
+      const view = await hydrogenBridge.createRoomView(roomId);
+
+      // Finally, mount the view in the .hydrogen element…
+      const chatMainElement = container.querySelector("chat-main .hydrogen");
+      chatMainElement.appendChild(view.mount());
+
+      // …and show the app! We're ready now!
+      this.status = "ready";
+      this.loadingStep = null;
     },
 
     _handleLoginError(error) {
