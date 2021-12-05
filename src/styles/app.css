@@ -13,6 +13,10 @@ body {
   padding: 0;
 }
 
+a {
+  color: #66b;
+}
+
 /**
  * chat-panel is the main chat container. It uses a single grid area, to size
  * its content to its own full size.
@@ -73,6 +77,8 @@ chat-error-message {
   font-size: 1.2em;
 }
 chat-panel[error-type="login-error"]
-  chat-error-message[for-error-type="login-error"] {
+  chat-error-message[for-error-type="login-error"],
+chat-panel[error-type="must-agree-to-terms"]
+  chat-error-message[for-error-type="must-agree-to-terms"] {
   display: block;
 }
