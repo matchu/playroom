@@ -7,22 +7,30 @@ export default class PlayroomModel {
     this.matrix = new MatrixClient({
       homeserver: this.roomId.split(":")[1],
     });
+    this.session = null;
   }
 
   async loginAsSavedSessionOrGuest() {
     // First, either read a saved session, or create a new guest session.
-    const session = this.readSavedSession() || (await this.loginAsGuest());
+    this.session =
+      this._readSavedSession() || (await this._createGuestSession());
 
-    // Then, ensure that we're in the chatroom.
-    await this.matrix.post(
-      `/_matrix/client/v3/join/${encodeURIComponent(this.roomId)}`,
-      { accessToken: session.accessToken }
+    // Then, save the session in storage for next time.
+    localStorage.setItem(
+      "playroom-matrix-session",
+      JSON.stringify(this.session)
     );
 
-    return session;
+    // Finally, make sure the account is all set up, then return.
+    // (We set display name before joining, to avoid a "user changed their
+    // name" message appearing in chat the first time they join.)
+    await this._ensureDisplayName();
+    await this._ensureJoinedRoom();
+
+    return this.session;
   }
 
-  readSavedSession() {
+  _readSavedSession() {
     try {
       const sessionString = localStorage.getItem("playroom-matrix-session");
       if (sessionString) {
@@ -39,7 +47,7 @@ export default class PlayroomModel {
     }
   }
 
-  async loginAsGuest() {
+  async _createGuestSession() {
     // First, create an account.
     const guestSessionData = await this.matrix.post(
       "/_matrix/client/v3/register?kind=guest",
@@ -50,39 +58,52 @@ export default class PlayroomModel {
       }
     );
 
-    // Then, build it into a session object for the rest of the app.
+    // Then, build it into a session object to use in future requests.
     const homeserverBaseUrl = await this.matrix.getUrlOnHomeserver("/");
-    const session = {
+    return {
       accessToken: guestSessionData.access_token,
       deviceId: guestSessionData.device_id,
       userId: guestSessionData.user_id,
       homeserverBaseUrl,
     };
-
-    // Then, give it a friendly display name.
-    const funDisplayName = generateFunDisplayName();
-    await this.setDisplayName({
-      accessToken: session.accessToken,
-      userId: session.userId,
-      newDisplayName: funDisplayName,
-    });
-
-    // Save the session for next time!
-    localStorage.setItem("playroom-matrix-session", JSON.stringify(session));
-
-    return session;
   }
 
-  async getDisplayName(session) {
-    const displayNameData = await this.matrix.get(
-      `/_matrix/client/v3/profile` +
-        `/${encodeURIComponent(session.userId)}/displayname`,
-      { accessToken: session.accessToken }
+  async _ensureDisplayName() {
+    // If the display name is just the default guest username (which we
+    // double-check is just digits, to decrease the odds of a bug where we
+    // overwrite real display names), replace it with a fun guest name!
+    const username = this.session.userId.split(":")[0].substr(1);
+    if (username.match(/^[0-9]+$/)) {
+      const displayName = await this.getDisplayName();
+      if (displayName === username) {
+        const newDisplayName = generateFunDisplayName();
+        await this.setDisplayName(newDisplayName);
+      }
+    }
+  }
+
+  async _ensureJoinedRoom() {
+    await this.matrix.post(
+      `/_matrix/client/v3/join/${encodeURIComponent(this.roomId)}`,
+      { accessToken: this.session.accessToken }
     );
-    return displayNameData.displayname;
   }
 
-  async setDisplayName({ accessToken, userId, newDisplayName }) {
+  async getDisplayName() {
+    if (!this._cachedDisplayName) {
+      const { accessToken, userId } = this.session;
+      const displayNameData = await this.matrix.get(
+        `/_matrix/client/v3/profile/${encodeURIComponent(userId)}/displayname`,
+        { accessToken }
+      );
+      this._cachedDisplayName = displayNameData.displayname;
+    }
+
+    return this._cachedDisplayName;
+  }
+
+  async setDisplayName(newDisplayName) {
+    const { accessToken, userId } = this.session;
     await this.matrix.put(
       `/_matrix/client/v3/profile/${encodeURIComponent(userId)}/displayname`,
       {
@@ -90,6 +111,7 @@ export default class PlayroomModel {
         body: { displayname: newDisplayName },
       }
     );
+    this._cachedDisplayName = newDisplayName;
   }
 }
 
