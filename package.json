@@ -1,0 +1,15 @@
+{
+  "name": "playroom",
+  "version": "1.0.0",
+  "description": "A personal streaming site, built on Matrix chat",
+  "dependencies": {
+    "parcel": "^2.0.1"
+  },
+  "devDependencies": {},
+  "source": "src/index.html",
+  "scripts": {
+    "start": "parcel"
+  },
+  "author": "Matchu",
+  "license": "UNLICENSED"
+}
