@@ -1,0 +1,12 @@
+#alert {
+  display: none;
+}
+
+#alert[data-status] {
+  display: block;
+  margin-bottom: 1em;
+}
+
+#alert[data-status="error"] {
+  color: #a00;
+}

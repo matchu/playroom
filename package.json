@@ -2,7 +2,13 @@
   "name": "playroom",
   "version": "1.0.0",
   "description": "A personal streaming site, built on Matrix chat",
+  "// comment": [
+    "We don't actually use fake-indexeddb, it's a dev lib for hydrogen-web, ",
+    "but its call site isn't getting tree shaken out so, oh well! Weird!"
+  ],
   "dependencies": {
+    "fake-indexeddb": "^3.1.7",
+    "hydrogen-web": "git+https://github.com/vector-im/hydrogen-web.git#semver:^0.2.22",
     "parcel": "^2.0.1"
   },
   "devDependencies": {},
