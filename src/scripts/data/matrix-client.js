@@ -1,19 +1,14 @@
 export default class MatrixClient {
-  constructor({ homeserver, roomId, appName = "Playroom" }) {
-    this.appName = appName;
-    this.roomId = roomId;
+  constructor({ homeserver }) {
     this.homeserver = homeserver;
-    this.homeserverUrl = new URL("about:blank");
-    this.homeserverUrl.protocol = "https";
-    this.homeserverUrl.host = homeserver;
   }
 
   async _getHomeserverBaseUrl() {
     // The first time the homeserver URL is requested, we make a request to the
     // .well-known document to learn where to *actually* send requests for this
     // homeserver name.
-    if (!this.homeserverBaseUrlPromise) {
-      this.homeserverBaseUrlPromise = (async () => {
+    if (!this._homeserverBaseUrlPromise) {
+      this._homeserverBaseUrlPromise = (async () => {
         const tentativeBaseUrl = new URL("about:blank");
         tentativeBaseUrl.protocol = "https";
         tentativeBaseUrl.host = this.homeserver;
@@ -64,10 +59,10 @@ export default class MatrixClient {
       })();
     }
 
-    return await this.homeserverBaseUrlPromise;
+    return await this._homeserverBaseUrlPromise;
   }
 
-  async _getUrlOnHomeserver(path) {
+  async getUrlOnHomeserver(path) {
     const baseUrl = await this._getHomeserverBaseUrl();
     return new URL(path, baseUrl);
   }
@@ -76,7 +71,7 @@ export default class MatrixClient {
     path,
     { body = null, accessToken = null, method = "GET" } = {}
   ) {
-    const url = await this._getUrlOnHomeserver(path);
+    const url = await this.getUrlOnHomeserver(path);
     const headers = {};
 
     if (body != null) {
@@ -145,117 +140,15 @@ export default class MatrixClient {
     return data;
   }
 
-  async _get(path, options = {}) {
+  async get(path, options = {}) {
     return await this._request(path, { ...options, method: "GET" });
   }
 
-  async _post(path, options = {}) {
+  async post(path, options = {}) {
     return await this._request(path, { ...options, method: "POST" });
   }
 
-  async _put(path, options = {}) {
+  async put(path, options = {}) {
     return await this._request(path, { ...options, method: "PUT" });
   }
-
-  async loginAsSavedSessionOrGuest() {
-    // First, either read a saved session, or create a new guest session.
-    const session = this.readSavedSession() || (await this.loginAsGuest());
-
-    // Then, ensure that we're in the chatroom.
-    await this._post(
-      `/_matrix/client/v3/join/${encodeURIComponent(this.roomId)}`,
-      { accessToken: session.accessToken }
-    );
-
-    return session;
-  }
-
-  readSavedSession() {
-    try {
-      const sessionString = localStorage.getItem("playroom-matrix-session");
-      if (sessionString) {
-        return JSON.parse(sessionString);
-      } else {
-        return null;
-      }
-    } catch (error) {
-      console.warn(
-        `[MatrixClient] Error reading saved session, skipping:`,
-        error
-      );
-      return null;
-    }
-  }
-
-  async loginAsGuest() {
-    // First, create an account.
-    const guestSessionData = await this._post(
-      "/_matrix/client/v3/register?kind=guest",
-      {
-        body: {
-          initial_device_display_name: this.appName,
-        },
-      }
-    );
-
-    // Then, build it into a session object for the rest of the app.
-    const homeserverBaseUrl = await this._getHomeserverBaseUrl();
-    const session = {
-      accessToken: guestSessionData.access_token,
-      deviceId: guestSessionData.device_id,
-      userId: guestSessionData.user_id,
-      homeserverBaseUrl: homeserverBaseUrl.toString().slice(0, -1),
-    };
-
-    // Then, give it a friendly display name.
-    const funDisplayName = generateFunDisplayName();
-    await this.setDisplayName({
-      accessToken: session.accessToken,
-      userId: session.userId,
-      newDisplayName: funDisplayName,
-    });
-
-    // Save the session for next time!
-    localStorage.setItem("playroom-matrix-session", JSON.stringify(session));
-
-    return session;
-  }
-
-  async setDisplayName({ accessToken, userId, newDisplayName }) {
-    await this._put(
-      `/_matrix/client/v3/profile/${encodeURIComponent(userId)}/displayname`,
-      {
-        accessToken,
-        body: { displayname: newDisplayName },
-      }
-    );
-  }
-}
-
-// TODO: These should probably be configurable lol
-const FUN_DISPLAY_NAME_NOUNS = [
-  "Snail",
-  "Duck",
-  "Cherry",
-  "Raymond",
-  "Mote",
-  "Sparkles",
-  "Daisy",
-  "Dark Knight",
-  "Thinker",
-  "Alicorn",
-  "Blossom",
-  "Chestnut",
-  "Flopsy",
-  "Dynamo",
-  "Lake",
-];
-
-function generateFunDisplayName() {
-  const noun =
-    FUN_DISPLAY_NAME_NOUNS[
-      Math.floor(Math.random() * FUN_DISPLAY_NAME_NOUNS.length)
-    ];
-  const letter = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"[Math.floor(Math.random() * 26)];
-  return `${noun} ${letter} (guest)`;
 }

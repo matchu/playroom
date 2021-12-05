@@ -1,12 +1,12 @@
 import ChatView from "./chat-view";
-import MatrixClient from "./matrix-client";
+import PlayroomModel from "./data/playroom-model";
 
 class App {
   constructor({ container, roomId }) {
     this.container = container;
     this.roomId = roomId;
     // TODO: Infer homeserver from roomId!
-    this.client = new MatrixClient({ homeserver: "matrix.org", roomId });
+    this.client = new PlayroomModel({ roomId });
     this.chatView = new ChatView({ container, client: this.client, roomId });
   }
 

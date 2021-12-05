@@ -30,12 +30,15 @@ export default class HydrogenBridge {
     const sessionId = Math.floor(
       Math.random() * Number.MAX_SAFE_INTEGER
     ).toString();
+    const homeserverBaseUrlString = session.homeserverBaseUrl
+      .toString()
+      .slice(0, -1);
     await this.platform.sessionInfoStorage.add({
       id: sessionId,
       deviceId: session.deviceId,
       userId: session.userId,
-      homeServer: session.homeserverBaseUrl,
-      homeserver: session.homeserverBaseUrl,
+      homeServer: homeserverBaseUrlString,
+      homeserver: homeserverBaseUrlString,
       accessToken: session.accessToken,
       lastUsed: new Date(),
     });
