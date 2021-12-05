@@ -51,6 +51,7 @@ export default class ChatView {
     this.sessionContainer = new SessionContainer({
       platform: this.hydrogenPlatform,
     });
+    monkeyPatchSessionContainer(this.sessionContainer);
     this.sessionContainer.startWithExistingSession(sessionId);
     await this.sessionContainer.loadStatus.waitFor(
       (status) =>
@@ -89,4 +90,33 @@ export default class ChatView {
     const view = new TimelineView(roomViewModel.timelineViewModel);
     this.container.appendChild(view.mount());
   }
+}
+
+// Monkey-patch syncing for compatibility with guest accounts.
+//
+// Hydrogen, at time of writing, creates a filter to apply `lazy_load_members`
+// to syncs. But guest accounts can't do that! So instead, we block the filter
+// request, and apply the same filter inline on sync requests.
+function monkeyPatchSessionContainer(sessionContainer) {
+  // `_waitForFirstSync` is a convenient moment just after the `_sync` object
+  // was created, but before the sync actually starts. That's when we patch!
+  const originalWaitForFirstSync =
+    sessionContainer._waitForFirstSync.bind(sessionContainer);
+  sessionContainer._waitForFirstSync = async (...args) => {
+    try {
+      // Replace the `createFilter` API call with a function that returns the
+      // same settings back, as a stringified "filter ID". This takes advantage
+      // of the fact that /sync will accept either a filter ID or a JSON string,
+      // so if we pretend this JSON string is a filter ID, the sync procedure
+      // uses it the same way, which happens to still be correct!
+      sessionContainer._sync._hsApi.createFilter = (_, filterSettings) => ({
+        response: async () => ({
+          filter_id: JSON.stringify(filterSettings),
+        }),
+      });
+    } catch (error) {
+      console.warn(`Error monkey-patching session syncing, ignoring`, error);
+    }
+    return await originalWaitForFirstSync(...args);
+  };
 }
