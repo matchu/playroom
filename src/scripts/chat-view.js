@@ -5,6 +5,7 @@ export default class ChatView {
   constructor({ container, playroom, roomId }) {
     this.container = container;
     this.roomId = roomId;
+    this.playroom = playroom;
     this.hydrogenBridge = new HydrogenBridge(this.container);
     this.displayNameForm = new DisplayNameForm({
       container: this.container.querySelector("display-name-form"),
@@ -20,9 +21,11 @@ export default class ChatView {
     this.container.setAttribute("loading-step", "logging-in");
   }
 
-  async useSession(session) {
+  async handleLoginSuccess() {
     // First, wait for Hydrogen to set itself up for this session.
-    await this.hydrogenBridge.startWithExistingSession(session);
+    await this.hydrogenBridge.startWithExistingSession(
+      this.playroom.getMatrixSessionData()
+    );
 
     // Then, build a Hydrogen TimelineView for this room.
     const view = await this.hydrogenBridge.createRoomView(this.roomId);
@@ -34,8 +37,8 @@ export default class ChatView {
     this.container.setAttribute("status", "ready");
     this.container.removeAttribute("loading-step");
 
-    // And tell our children about it, too.
-    await this.displayNameForm.useSession(session);
+    // And tell our children about the login, too.
+    await this.displayNameForm.handleLoginSuccess();
   }
 
   handleLoginError(error, retry) {

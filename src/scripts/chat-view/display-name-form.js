@@ -3,7 +3,7 @@ export default class DisplayNameForm {
     this.container = container;
     this.playroom = playroom;
 
-    this.state = { session: null, displayName: null, isSubmitting: false };
+    this.state = { displayName: null, isSubmitting: false };
 
     this.form = this.container.querySelector("form");
     this.textField = this.container.querySelector("input[type=text]");
@@ -19,9 +19,8 @@ export default class DisplayNameForm {
       });
   }
 
-  async useSession(session) {
-    this.session = session;
-    this.state.displayName = await this.playroom.getDisplayName(session);
+  async handleLoginSuccess() {
+    this.state.displayName = await this.playroom.getDisplayName();
     this.update();
   }
 
@@ -33,18 +32,13 @@ export default class DisplayNameForm {
   }
 
   async onSubmit() {
-    if (this.session == null) {
-      throw new Error(`can't submit DisplayNameForm without a session`);
-    }
-
-    const { accessToken, userId } = this.session;
     const newDisplayName = this.textField.value;
 
     this.state.displayName = newDisplayName;
     this.state.isSubmitting = true;
     this.update();
 
-    await this.playroom.setDisplayName({ accessToken, userId, newDisplayName });
+    await this.playroom.setDisplayName(newDisplayName);
 
     this.state.isSubmitting = false;
     this.textField.blur();

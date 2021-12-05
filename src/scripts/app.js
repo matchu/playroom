@@ -21,8 +21,8 @@ class App {
 
   async login() {
     try {
-      const session = await this.playroom.loginAsSavedSessionOrGuest();
-      await this.chatView.useSession(session);
+      await this.playroom.loginAsSavedSessionOrGuest();
+      await this.chatView.handleLoginSuccess();
     } catch (error) {
       // The ChatView will display the error, and potentially retry the login
       // if it becomes appropriate.
