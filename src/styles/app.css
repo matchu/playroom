@@ -8,17 +8,17 @@ body {
   padding: 0;
 }
 
-#chat {
+chat-panel {
   display: grid;
   grid-template-areas: "the-single-area";
 }
 
-#chat .hydrogen {
+chat-panel .hydrogen {
   grid-area: the-single-area;
   z-index: 1;
 }
 
-.chat-loading-message {
+chat-loading-indicator {
   grid-area: the-single-area;
   z-index: 2;
 
@@ -30,22 +30,22 @@ body {
   color: white;
 }
 
-.chat-loading-message > * {
+chat-panel[status="ready"] chat-loading-indicator {
+  display: none;
+}
+
+chat-loading-message {
   display: none;
   text-align: center;
   font-size: 1.5em;
 }
 
-.chat-loading-message[data-status="loading"] [data-for-status="loading"] {
+chat-panel[status="loading"] chat-loading-message[for-status="loading"] {
   display: block;
 }
 
-.chat-loading-message[data-status="logging-in"] [data-for-status="logging-in"] {
+chat-panel[status="logging-in"] chat-loading-message[for-status="logging-in"] {
   display: block;
-}
-
-.chat-loading-message[data-status="ready"] {
-  display: none;
 }
 
 #alert {

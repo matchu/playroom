@@ -9,12 +9,16 @@
   </head>
   <body>
     <div id="alert"></div>
-    <div id="chat">
-      <div class="chat-loading-message" data-status="loading">
-        <div data-for-status="loading">Loading…</div>
-        <div data-for-status="logging-in">Logging in…</div>
-      </div>
+    <chat-panel status="loading">
+      <chat-loading-indicator>
+        <chat-loading-message for-status="loading">
+          Loading…
+        </chat-loading-message>
+        <chat-loading-message for-status="logging-in">
+          Logging in…
+        </chat-loading-message>
+      </chat-loading-indicator>
       <div class="hydrogen"></div>
-    </div>
+    </chat-panel>
   </body>
 </html>

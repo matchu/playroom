@@ -7,7 +7,7 @@ async function startApp() {
   ).content;
 
   const chatView = new ChatView({
-    container: document.querySelector("#chat"),
+    container: document.querySelector("chat-panel"),
     roomId,
   });
   chatView.mount();
