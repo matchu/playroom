@@ -3,7 +3,7 @@ import {
   Platform,
   RoomViewModel,
   SessionContainer,
-  TimelineView,
+  RoomView,
 } from "hydrogen-web";
 
 export default class HydrogenBridge {
@@ -66,7 +66,7 @@ export default class HydrogenBridge {
     }
   }
 
-  async createTimelineView(roomId) {
+  async createRoomView(roomId) {
     const hydrogenSession = this.sessionContainer.session;
     const room = hydrogenSession.rooms.get(roomId);
     if (!room) {
@@ -83,7 +83,7 @@ export default class HydrogenBridge {
     });
     await roomViewModel.load();
 
-    return new TimelineView(roomViewModel.timelineViewModel);
+    return new RoomView(roomViewModel);
   }
 }
 

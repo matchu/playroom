@@ -9,9 +9,13 @@
 .hydrogen {
   display: flex;
   flex-direction: column;
-  height: 90vh; /* TODO */
+  height: 100vh; /* TODO */
 }
 
-.hydrogen > .Timeline {
+.hydrogen > .RoomView {
   flex: 1 0 0;
+}
+
+.RoomHeader {
+  display: none;
 }

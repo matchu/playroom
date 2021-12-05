@@ -16,7 +16,7 @@ export default class ChatView {
     await this.hydrogenBridge.startWithExistingSession(session);
 
     // Then, build a Hydrogen TimelineView for this room.
-    const view = await this.hydrogenBridge.createTimelineView(this.roomId);
+    const view = await this.hydrogenBridge.createRoomView(this.roomId);
 
     // Finally, mount the view. We'll also wrap it in an additional .hydrogen
     // element, which Hydrogen looks for as a container sometimes.
