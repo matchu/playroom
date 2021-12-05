@@ -11,6 +11,7 @@ export default class ChatView {
   }
 
   useSession(session) {
+    console.log("TODO: Use the session", session);
     this.container.innerHTML = "";
     this.hydrogenPlatform = new Platform(this.container, {});
     this.sessionContainer = new SessionContainer({

@@ -11,10 +11,13 @@
     "hydrogen-web": "git+https://github.com/vector-im/hydrogen-web.git#semver:^0.2.22",
     "parcel": "^2.0.1"
   },
-  "devDependencies": {},
+  "devDependencies": {
+    "eslint": "^8.4.0"
+  },
   "source": "src/index.html",
   "scripts": {
-    "start": "parcel"
+    "start": "parcel",
+    "lint": "eslint src"
   },
   "author": "Matchu",
   "license": "UNLICENSED"
