@@ -73,14 +73,6 @@ video-panel iframe {
 }
 
 /**
- * The iframe is hidden until it has a src specified, retrieved from the
- * backend.
- */
-video-panel iframe:not([src]) {
-  display: none;
-}
-
-/**
  * chat-panel is the main chat container. It uses a single grid area, to size
  * its content to its own full size.
  */

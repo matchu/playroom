@@ -11,6 +11,7 @@ export default class PlayroomModel {
     this.state = reactive({
       _session: null,
       displayName: null,
+      streamState: { status: "loading" },
     });
   }
 
@@ -164,6 +165,39 @@ export default class PlayroomModel {
     this.state.displayName = newDisplayName;
   }
 
+  async loadStreamState() {
+    // Find the first active widget, and get the embed URL from it.
+    //
+    // NOTE: I'm basing my widget stuff on the widgets API RFC that seems to be
+    // what Element and Synapse are using-ish. The main difference seems to be
+    // that the widget type is still proprietary instead of `m.widget`. I'm not
+    // gonna add `m.widget` support until it gets into the actual spec!
+    //
+    // https://docs.google.com/document/d/1uPF7XWY_dXTKVKV7jZQ2KmsI19wn9-kFRgQ1tFQP7wQ/edit#heading=h.ll7aaslz33ov
+    const { accessToken } = this.getMatrixSessionData();
+    const roomEvents = await this._matrix.get(
+      `/_matrix/client/v3/rooms/${encodeURIComponent(this.roomId)}/state`,
+      { accessToken }
+    );
+    const widgetEvents = roomEvents.filter(
+      (event) => event.type === "im.vector.modular.widgets"
+    );
+
+    // Widgets that were removed will still have events, but no content.
+    const widgetUrls = widgetEvents
+      .map((event) => event.content?.url)
+      .filter((url) => url != null && isValidUrl(url));
+
+    if (widgetUrls.length >= 1) {
+      this.state.streamState = {
+        status: "ready",
+        videoEmbedUrl: widgetUrls[0],
+      };
+    } else {
+      this.state.streamState = { status: "idle" };
+    }
+  }
+
   /**
    * Returns the raw Matrix session data.
    *
@@ -179,6 +213,15 @@ export default class PlayroomModel {
   getMatrixSessionData() {
     return this.state._session.matrix;
   }
+}
+
+function isValidUrl(maybeUrl) {
+  try {
+    new URL(maybeUrl);
+  } catch (error) {
+    return false;
+  }
+  return true;
 }
 
 // TODO: These should probably be configurable lol

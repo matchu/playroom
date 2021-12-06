@@ -13,12 +13,16 @@ function mountPlayroomApp({ container, roomId }) {
     loadingStep: "loading",
     errorType: null,
     termsUrl: "/terms-placeholder.html",
+    get streamState() {
+      return playroom.state.streamState;
+    },
     DisplayNameForm: () => DisplayNameForm({ playroom }),
 
     async login() {
       this.loadingStep = "logging-in";
       try {
         await playroom.loginAsSavedSessionOrGuest();
+        await playroom.loadStreamState();
         this._handleLoginSuccess();
       } catch (error) {
         console.error(error);

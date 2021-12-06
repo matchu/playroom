@@ -19,7 +19,8 @@
     >
       <video-panel>
         <iframe
-          src="https://www.youtube-nocookie.com/embed/YogtSeb_O9s"
+          v-bind:src="streamState.videoEmbedUrl"
+          v-if="streamState.status === 'ready'"
           title="Stream video content"
           frameborder="0"
           allow="clipboard-write; encrypted-media; picture-in-picture"
