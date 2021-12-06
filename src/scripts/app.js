@@ -21,8 +21,10 @@ function mountPlayroomApp({ container, roomId }) {
     async login() {
       this.loadingStep = "logging-in";
       try {
-        await playroom.loginAsSavedSessionOrGuest();
-        await playroom.loadStreamState();
+        await Promise.all([
+          playroom.loginAsSavedSessionOrGuest(),
+          playroom.loadStreamState(),
+        ]);
         this._handleLoginSuccess();
       } catch (error) {
         console.error(error);
