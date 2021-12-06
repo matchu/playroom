@@ -11,7 +11,7 @@ export default class PlayroomModel {
     this.state = reactive({
       _session: null,
       displayName: null,
-      streamState: { status: "loading" },
+      streamState: reactive({ status: "loading", videoEmbedUrl: null }),
     });
   }
 
@@ -189,12 +189,11 @@ export default class PlayroomModel {
       .filter((url) => url != null && isValidUrl(url));
 
     if (widgetUrls.length >= 1) {
-      this.state.streamState = {
-        status: "ready",
-        videoEmbedUrl: widgetUrls[0],
-      };
+      this.state.streamState.status = "ready";
+      this.state.streamState.videoEmbedUrl = widgetUrls[0];
     } else {
-      this.state.streamState = { status: "idle" };
+      this.state.streamState.status = "idle";
+      this.state.streamState.videoEmbedUrl = null;
     }
   }
 

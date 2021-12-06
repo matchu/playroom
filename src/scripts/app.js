@@ -38,6 +38,9 @@ function mountPlayroomApp({ container, roomId }) {
       const view = await hydrogenBridge.createRoomView(roomId);
       this.$refs.hydrogenRoomView.appendChild(view.mount());
 
+      // Also, let's start reloading the stream state every 10 seconds.
+      setInterval(() => playroom.loadStreamState(), 10000);
+
       // Okay, we're ready now! Show the app!
       this.status = "ready";
       this.loadingStep = null;
