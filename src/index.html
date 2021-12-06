@@ -17,7 +17,7 @@
       v-bind:error-type="errorType"
       @mounted="login"
     >
-      <video-panel>
+      <stream-panel v-bind:stream-status="streamState.status">
         <iframe
           v-bind:src="streamState.videoEmbedUrl"
           v-if="streamState.status === 'ready'"
@@ -26,7 +26,10 @@
           allow="clipboard-write; encrypted-media; picture-in-picture"
           allowfullscreen
         ></iframe>
-      </video-panel>
+        <stream-idle-indicator>
+          No stream right now! Hope you're doing well today! 💖
+        </stream-idle-indicator>
+      </stream-panel>
       <chat-panel>
         <chat-loading-indicator>
           <chat-loading-message for-loading-step="loading">

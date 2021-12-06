@@ -24,7 +24,7 @@ playroom-app {
   display: grid;
   height: 100%;
 }
-video-panel {
+stream-panel {
   grid-area: video;
 }
 chat-panel {
@@ -57,19 +57,35 @@ chat-panel {
 }
 
 /**
- * The video panel has a dark background. It will be covered by the iframe once
- * it loads.
+ * The video panel has a dark background, and centers its contents. It will be
+ * covered by the iframe once it loads.
  */
-video-panel {
+stream-panel {
   background: #223;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
 }
 
 /**
  * The embedded iframe takes up the whole area.
  */
-video-panel iframe {
+stream-panel iframe {
   width: 100%;
   height: 100%;
+}
+
+/**
+ * The stream idle indicator only appears when there's no stream.
+ */
+stream-idle-indicator {
+  display: none;
+  color: white;
+  text-align: center;
+}
+stream-panel[stream-status="idle"] stream-idle-indicator {
+  display: block;
 }
 
 /**
