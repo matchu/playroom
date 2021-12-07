@@ -8,16 +8,8 @@
     <script type="module" src="scripts/app.js"></script>
   </head>
   <body>
-    <playroom-app
-      status="loading"
-      loading-step="loading"
-      v-scope
-      v-bind:status="status"
-      v-bind:loading-step="loadingStep"
-      v-bind:error-type="errorType"
-      @mounted="login"
-    >
-      <stream-panel v-bind:stream-status="streamState.status">
+    <playroom-app v-scope @mounted="login">
+      <stream-panel>
         <iframe
           v-bind:src="streamState.videoEmbedUrl"
           v-if="streamState.status === 'ready'"
@@ -26,27 +18,33 @@
           allow="clipboard-write; encrypted-media; picture-in-picture"
           allowfullscreen
         ></iframe>
-        <stream-idle-indicator>
+        <stream-idle-indicator v-if="streamState.status === 'idle'">
           No stream right now! Hope you're doing well today! 💖
         </stream-idle-indicator>
       </stream-panel>
       <chat-panel>
-        <chat-loading-indicator>
-          <chat-loading-message for-loading-step="loading">
+        <chat-loading-indicator
+          v-if="status === 'loading'"
+          v-show-while-page-loading
+        >
+          <chat-loading-message
+            v-if="loadingStep === 'loading'"
+            v-show-while-page-loading
+          >
             Loading…
           </chat-loading-message>
-          <chat-loading-message for-loading-step="logging-in">
+          <chat-loading-message v-if="loadingStep === 'logging-in'">
             Logging in…
           </chat-loading-message>
         </chat-loading-indicator>
-        <chat-error-indicator>
-          <chat-error-message for-error-type="login-error">
+        <chat-error-indicator v-if="status === 'error'">
+          <chat-error-message v-if="errorType === 'login-error'">
             <p>We're having trouble logging you into chat, sorry 😖</p>
             <p>
               You can come find me and ask me for help if it keeps happening!
             </p>
           </chat-error-message>
-          <chat-error-message for-error-type="must-agree-to-terms">
+          <chat-error-message v-if="errorType === 'must-agree-to-terms'">
             <p>Hi welcome!! Excited to have you!!</p>
             <p>
               To use chat, you'll need to read
@@ -61,7 +59,12 @@
             <p>You can also just hang out and watch if you want 😊</p>
           </chat-error-message>
         </chat-error-indicator>
-        <chat-main>
+        <!--
+          chat-main uses v-show instead of v-if, so that it's always mounted in
+          the page. That's because we start loading Hydrogen onto the page, and
+          then wait for it to finish before we become "ready" and show it!
+        -->
+        <chat-main v-show="status === 'ready'">
           <header>
             <h1>Chat</h1>
             <display-name-form v-scope="DisplayNameForm()">

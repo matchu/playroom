@@ -77,15 +77,11 @@ stream-panel iframe {
 }
 
 /**
- * The stream idle indicator only appears when there's no stream.
+ * The stream idle indicator appears when there's no stream.
  */
 stream-idle-indicator {
-  display: none;
   color: white;
   text-align: center;
-}
-stream-panel[stream-status="idle"] stream-idle-indicator {
-  display: block;
 }
 
 /**
@@ -99,27 +95,14 @@ chat-panel {
 }
 
 /**
- * The [status] attribute of chat-panel determines which content we show.
- * It takes up the whole chat-panel area.
+ * All three content areas take up the whole chat-panel, and are column flex
+ * containers.
  */
 chat-main,
 chat-loading-indicator,
 chat-error-indicator {
-  display: none;
   grid-area: the-single-area;
-}
-playroom-app[status="ready"] chat-main,
-playroom-app[status="loading"] chat-loading-indicator,
-playroom-app[status="error"] chat-error-indicator {
   display: flex;
-}
-
-/**
- * All three content areas are column flex containers.
- */
-chat-main,
-chat-loading-indicator,
-chat-error-indicator {
   flex-direction: column;
 }
 
@@ -133,33 +116,17 @@ chat-error-indicator {
 }
 
 /**
- * Chat loading messages are hidden until the right loading-step.
- * They also have big typographical styles!
+ * Chat loading messages have big typographical styles!
  */
 chat-loading-message {
-  display: none;
   font-size: 1.5em;
-}
-playroom-app[loading-step="loading"]
-  chat-loading-message[for-loading-step="loading"],
-playroom-app[loading-step="logging-in"]
-  chat-loading-message[for-loading-step="logging-in"] {
-  display: block;
 }
 
 /**
- * Chat error messages are hidden unless it's the right error-type.
- * They also have big typographical styles!
+ * Chat error messages have medium typographical styles.
  */
 chat-error-message {
-  display: none;
   font-size: 1.2em;
-}
-playroom-app[error-type="login-error"]
-  chat-error-message[for-error-type="login-error"],
-playroom-app[error-type="must-agree-to-terms"]
-  chat-error-message[for-error-type="must-agree-to-terms"] {
-  display: block;
 }
 
 /**
@@ -195,4 +162,15 @@ display-name-form label {
   display: flex;
   flex-direction: column;
   gap: 0.25em;
+}
+
+/**
+ * While the page is still loading JS, hide all elements with v-if or v-show
+ * conditions, unless they're also tagged with v-show-while-page-loading.
+ *
+ * That way, we can show loading UI while the JS is loading, but hide it once
+ * the page starts up.
+ */
+playroom-app[v-scope] :is([v-if], [v-show]):not([v-show-while-page-loading]) {
+  display: none;
 }
