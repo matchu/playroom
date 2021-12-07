@@ -36,9 +36,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     return;
   }
 
-  const roomId = document.querySelector(
-    "meta[name='playroom:room-id']"
-  )?.content;
+  const roomIdMetaTag = document.querySelector("meta[name='playroom:room-id']");
+  const roomId = roomIdMetaTag?.content;
   if (roomId == null) {
     alert(
       `Error: Can't find the room ID. It should be configured in the <head> ` +
