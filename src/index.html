@@ -11,14 +11,14 @@
     <playroom-app v-scope @mounted="startPlayroom">
       <stream-panel>
         <iframe
-          v-bind:src="streamState.videoEmbedUrl"
-          v-if="streamState.status === 'ready'"
+          v-bind:src="stream.videoEmbedUrl"
+          v-if="stream.status === 'ready'"
           title="Stream video content"
           frameborder="0"
           allow="clipboard-write; encrypted-media; picture-in-picture"
           allowfullscreen
         ></iframe>
-        <stream-idle-indicator v-if="streamState.status === 'idle'">
+        <stream-idle-indicator v-if="stream.status === 'idle'">
           No stream right now! Hope you're doing well today! 💖
         </stream-idle-indicator>
       </stream-panel>

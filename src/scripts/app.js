@@ -12,9 +12,7 @@ function mountPlayroomApp({ container, roomId }) {
     status: "loading",
     errorType: null,
     termsUrl: "/terms-placeholder.html",
-    get streamState() {
-      return playroom.state.streamState;
-    },
+    stream: playroom.state.stream,
     DisplayNameForm: () => DisplayNameForm({ playroom }),
 
     async startPlayroom() {
