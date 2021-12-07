@@ -33,6 +33,15 @@ export default class PlayroomModel {
       JSON.stringify(this.state._session)
     );
 
+    // Start loading the stream state. We don't await this, we just let the
+    // reactive state tell us about it later!
+    this.loadStreamState().catch((error) =>
+      console.error(
+        "[PlayroomModel] Error loading stream state during login",
+        error
+      )
+    );
+
     // Finally, make sure the account is all set up, then return.
     // (We set display name before joining, to avoid a "user changed their
     // name" message appearing in chat the first time they join.)
