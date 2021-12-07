@@ -60,19 +60,24 @@
         <chat-main v-if="chat.status === 'ready'" v-show="hydrogenLoaded">
           <header>
             <h1>Chat</h1>
-            <display-name-form v-scope="DisplayNameForm()">
-              <form @submit="saveDisplayName">
+            <display-name-form>
+              <form @submit="displayNameForm.submit">
                 <label>
                   <div>Display name</div>
                   <input
                     type="text"
-                    v-model="displayName"
-                    v-bind:disabled="isDisabled"
+                    v-model="displayNameForm.displayName"
+                    v-bind:disabled="displayNameForm.isDisabled"
                     required
                     ref="displayNameInput"
                   />
                 </label>
-                <button type="submit" v-bind:disabled="isDisabled">Save</button>
+                <button
+                  type="submit"
+                  v-bind:disabled="displayNameForm.isDisabled"
+                >
+                  Save
+                </button>
               </form>
             </display-name-form>
           </header>

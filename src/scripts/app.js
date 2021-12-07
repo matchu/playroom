@@ -12,7 +12,7 @@ function mountPlayroomApp({ container, roomId }) {
     chat: playroom.state.chat,
     stream: playroom.state.stream,
     hydrogenLoaded: false,
-    DisplayNameForm: () => DisplayNameForm({ playroom }),
+    displayNameForm: DisplayNameForm({ playroom }),
 
     startPlayroom() {
       playroom.start();

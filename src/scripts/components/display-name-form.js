@@ -1,18 +1,22 @@
+import { reactive } from "../lib/petite-vue";
+
 export default function DisplayNameForm({ playroom }) {
-  return {
-    _playroomState: playroom.state,
+  return reactive({
     _localDisplayName: null,
     isSaving: false,
+
     get displayName() {
-      return this._localDisplayName ?? this._playroomState.chat.displayName;
+      return this._localDisplayName ?? playroom.state.chat.displayName;
     },
     set displayName(newDisplayName) {
       this._localDisplayName = newDisplayName;
     },
+
     get isDisabled() {
       return this.displayName == null || this.isSaving;
     },
-    async saveDisplayName(e) {
+
+    async submit(e) {
       e.preventDefault();
       this.isSaving = true;
 
@@ -31,5 +35,5 @@ export default function DisplayNameForm({ playroom }) {
 
       this.$refs.displayNameInput.blur();
     },
-  };
+  });
 }
