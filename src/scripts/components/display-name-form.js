@@ -4,7 +4,7 @@ export default function DisplayNameForm({ playroom }) {
     _localDisplayName: null,
     isSaving: false,
     get displayName() {
-      return this._localDisplayName ?? this._playroomState.displayName;
+      return this._localDisplayName ?? this._playroomState.chat.displayName;
     },
     set displayName(newDisplayName) {
       this._localDisplayName = newDisplayName;

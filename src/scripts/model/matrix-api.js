@@ -1,4 +1,4 @@
-export default class MatrixClient {
+export default class MatrixAPI {
   constructor({ homeserver }) {
     this.homeserver = homeserver;
   }

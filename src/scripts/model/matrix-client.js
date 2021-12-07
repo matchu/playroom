@@ -1,48 +1,31 @@
 import { reactive } from "../lib/petite-vue";
-import MatrixClient from "./matrix-client";
+import MatrixAPI from "./matrix-api";
 
-export default class PlayroomModel {
-  constructor({ roomId, appName = "Playroom" }) {
-    this.appName = appName;
-    this.roomId = roomId;
-    this._matrix = new MatrixClient({
-      homeserver: this.roomId.split(":")[1],
+export default class MatrixClient {
+  constructor({ roomId }) {
+    this._roomId = roomId;
+    this._api = new MatrixAPI({
+      homeserver: roomId.split(":")[1],
     });
     this.state = reactive({
-      _session: null,
+      session: null,
       displayName: null,
-      stream: reactive({ status: "loading", videoEmbedUrl: null }),
     });
   }
 
   async loginAsSavedSessionOrGuest() {
-    // First, read the saved session, or create a new empty one.
-    this.state._session = this._readSavedSession() || {};
-
-    // If it doesn't have a Matrix session, create one.
-    if (!this.state._session.matrix) {
-      this.state._session = {
-        ...this.state._session,
-        matrix: await this._createGuestMatrixSession(),
-      };
-    }
+    // First, read the saved session, or create a guest session.
+    this.state.session =
+      this._readSavedSession() || (await this._createGuestMatrixSession());
 
     // Then, save the session in storage for next time.
     localStorage.setItem(
       "playroom-matrix-session",
-      JSON.stringify(this.state._session)
+      JSON.stringify(this.state.session)
     );
+  }
 
-    // Start loading the stream state. We don't await this, we just let the
-    // reactive state tell us about it later!
-    this.loadStreamState().catch((error) =>
-      console.error(
-        "[PlayroomModel] Error loading stream state during login",
-        error
-      )
-    );
-
-    // Finally, make sure the account is all set up, then return.
+  async ensureAccountIsReadyToChat() {
     // (We set display name before joining, to avoid a "user changed their
     // name" message appearing in chat the first time they join.)
     try {
@@ -72,7 +55,7 @@ export default class PlayroomModel {
 
   async _createGuestMatrixSession() {
     // First, create an account.
-    const guestSessionData = await this._matrix.post(
+    const guestSessionData = await this._api.post(
       "/_matrix/client/v3/register?kind=guest",
       {
         body: {
@@ -82,7 +65,7 @@ export default class PlayroomModel {
     );
 
     // Then, build it into a Matrix session object to use in future requests.
-    const homeserverBaseUrl = await this._matrix.getUrlOnHomeserver("/");
+    const homeserverBaseUrl = await this._api.getUrlOnHomeserver("/");
     return {
       accessToken: guestSessionData.access_token,
       deviceId: guestSessionData.device_id,
@@ -92,7 +75,7 @@ export default class PlayroomModel {
   }
 
   async _ensureDisplayName() {
-    const { userId } = this.getMatrixSessionData();
+    const { userId } = this.state.session;
 
     // If the display name is just the default guest username (which we
     // double-check is just digits, to decrease the odds of a bug where we
@@ -108,17 +91,19 @@ export default class PlayroomModel {
   }
 
   async _ensureJoinedRoom() {
-    const { accessToken } = this.getMatrixSessionData();
+    const { accessToken } = this.state.session;
 
-    await this._matrix.post(
-      `/_matrix/client/v3/join/${encodeURIComponent(this.roomId)}`,
+    await this._api.post(
+      `/_matrix/client/v3/join/${encodeURIComponent(this._roomId)}`,
       { accessToken }
     );
   }
 
   _wrapAccountSetupError(error) {
     // Check if this is a Terms & Conditions consent error. If so, handle
-    // it specially, so the app can help the user resolve it.
+    // it specially, so the app can help the user resolve it. (This is specific
+    // to the Synapse consent implementation. matrix.org uses this, so I expect
+    // it to be helpful for a lot of folks deploying from scratch!)
     if (
       error.responseStatus === 403 &&
       error.responseData?.errcode === "M_CONSENT_NOT_GIVEN"
@@ -127,17 +112,15 @@ export default class PlayroomModel {
         /you must review and agree to our terms and conditions at (https:\/\/\S+)\.$/
       );
       if (consentMatch) {
-        // This is specific to the Synapse consent implementation.
-        // matrix.org uses this, so I expect it to be helpful for a lot of
-        // folks deploying from scratch!
+        //
         const termsError = new Error(
-          `[PlayroomModel] User must agree to the terms & conditions first`
+          `[Playroom] User must agree to the terms & conditions first`
         );
         termsError.termsUrl = consentMatch[1];
         return termsError;
       } else {
         console.warn(
-          `[PlayroomModel] Received M_CONSENT_NOT_GIVEN error, but it didn't match the error message format. Leaving as-is.`,
+          `[Playroom] Received M_CONSENT_NOT_GIVEN error, but it didn't match the error message format. Leaving as-is.`,
           error
         );
       }
@@ -148,9 +131,9 @@ export default class PlayroomModel {
 
   async getDisplayName() {
     if (!this.state.displayName) {
-      const { accessToken, userId } = this.getMatrixSessionData();
+      const { accessToken, userId } = this.state.session;
 
-      const displayNameData = await this._matrix.get(
+      const displayNameData = await this._api.get(
         `/_matrix/client/v3/profile/${encodeURIComponent(userId)}/displayname`,
         { accessToken }
       );
@@ -161,9 +144,9 @@ export default class PlayroomModel {
   }
 
   async setDisplayName(newDisplayName) {
-    const { accessToken, userId } = this.getMatrixSessionData();
+    const { accessToken, userId } = this.state.session;
 
-    await this._matrix.put(
+    await this._api.put(
       `/_matrix/client/v3/profile/${encodeURIComponent(userId)}/displayname`,
       {
         accessToken,
@@ -174,7 +157,7 @@ export default class PlayroomModel {
     this.state.displayName = newDisplayName;
   }
 
-  async loadStreamState() {
+  async getRoomWidgetUrls() {
     // Find the first active widget, and get the embed URL from it.
     //
     // NOTE: I'm basing my widget stuff on the widgets API RFC that seems to be
@@ -183,9 +166,9 @@ export default class PlayroomModel {
     // gonna add `m.widget` support until it gets into the actual spec!
     //
     // https://docs.google.com/document/d/1uPF7XWY_dXTKVKV7jZQ2KmsI19wn9-kFRgQ1tFQP7wQ/edit#heading=h.ll7aaslz33ov
-    const { accessToken } = this.getMatrixSessionData();
-    const roomEvents = await this._matrix.get(
-      `/_matrix/client/v3/rooms/${encodeURIComponent(this.roomId)}/state`,
+    const { accessToken } = this.state.session;
+    const roomEvents = await this._api.get(
+      `/_matrix/client/v3/rooms/${encodeURIComponent(this._roomId)}/state`,
       { accessToken }
     );
     const widgetEvents = roomEvents.filter(
@@ -197,29 +180,7 @@ export default class PlayroomModel {
       .map((event) => event.content?.url)
       .filter((url) => url != null && isValidUrl(url));
 
-    if (widgetUrls.length >= 1) {
-      this.state.stream.status = "ready";
-      this.state.stream.videoEmbedUrl = widgetUrls[0];
-    } else {
-      this.state.stream.status = "idle";
-      this.state.stream.videoEmbedUrl = null;
-    }
-  }
-
-  /**
-   * Returns the raw Matrix session data.
-   *
-   * This is escape hatch for integrations with Matrix UI libraries, like
-   * Hydrogen, who *need* the raw session to get *anything* done.
-   *
-   * In general, Playroom developers should prefer to handle Matrix logic
-   * inside this model class instead! That way, the app sees a generic Playroom
-   * API rather than anything Matrix-specific, which will enable us to refactor
-   * with minimal impact to the rest of the app and any customizations the
-   * Playroom owner may have made.
-   */
-  getMatrixSessionData() {
-    return this.state._session.matrix;
+    return widgetUrls;
   }
 }
 

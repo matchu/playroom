@@ -24,25 +24,27 @@
       </stream-panel>
       <chat-panel>
         <chat-loading-message
-          v-if="status === 'loading'"
+          v-if="chat.status === 'loading'"
           v-show-while-page-loading
         >
           <div>Loading…</div>
         </chat-loading-message>
-        <chat-loading-message v-if="status === 'logging-in'">
+        <chat-loading-message
+          v-if="chat.status === 'logging-in' || (chat.status === 'ready' && !hydrogenLoaded)"
+        >
           <div>Logging in…</div>
         </chat-loading-message>
-        <chat-error-message v-if="status === 'login-error'">
+        <chat-error-message v-if="chat.status === 'login-error'">
           <p>We're having trouble logging you into chat, sorry 😖</p>
           <p>You can come find me and ask me for help if it keeps happening!</p>
         </chat-error-message>
-        <chat-error-message v-if="status === 'must-agree-to-terms'">
+        <chat-error-message v-if="chat.status === 'must-agree-to-terms'">
           <p>Hi welcome!! Excited to have you!!</p>
           <p>
             To use chat, you'll need to read
             <a
               href="terms-placeholder.html"
-              v-bind:href="termsUrl"
+              v-bind:href="chat.termsUrl"
               target="_blank"
               >our chat server's terms</a
             >
@@ -55,7 +57,7 @@
           the page. That's because we start loading Hydrogen onto the page, and
           then wait for it to finish before we become "ready" and show it!
         -->
-        <chat-main v-show="status === 'ready'">
+        <chat-main v-if="chat.status === 'ready'" v-show="hydrogenLoaded">
           <header>
             <h1>Chat</h1>
             <display-name-form v-scope="DisplayNameForm()">
@@ -74,7 +76,7 @@
               </form>
             </display-name-form>
           </header>
-          <div class="hydrogen" ref="hydrogenRoomView"></div>
+          <div class="hydrogen" ref="hydrogen" @mounted="loadHydrogen"></div>
         </chat-main>
       </chat-panel>
     </playroom-app>
