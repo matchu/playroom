@@ -10,7 +10,6 @@ function mountPlayroomApp({ container, roomId }) {
   createApp({
     roomId,
     status: "loading",
-    loadingStep: "loading",
     errorType: null,
     termsUrl: "/terms-placeholder.html",
     get streamState() {
@@ -18,8 +17,14 @@ function mountPlayroomApp({ container, roomId }) {
     },
     DisplayNameForm: () => DisplayNameForm({ playroom }),
 
-    async login() {
-      this.loadingStep = "logging-in";
+    async startPlayroom() {
+      this.status = "logging-in";
+      this._login();
+    },
+
+    async _login() {
+      // NOTE: We don't set `this.status = "logging-in"` here, because we also
+      //       call this automatically during the `must-agree-to-terms` flow!
       try {
         await playroom.loginAsSavedSessionOrGuest();
         this._handleLoginSuccess();
@@ -42,16 +47,14 @@ function mountPlayroomApp({ container, roomId }) {
 
       // Okay, we're ready now! Show the app!
       this.status = "ready";
-      this.loadingStep = null;
     },
 
     _handleLoginError(error) {
       if (error.termsUrl) {
         try {
-          this.status = "error";
-          this.errorType = "must-agree-to-terms";
+          this.status = "must-agree-to-terms";
           this.termsUrl = error.termsUrl;
-          setTimeout(() => this.login(), 3000);
+          setTimeout(() => this._login(), 3000);
           return;
         } catch (error2) {
           console.warn(
@@ -61,8 +64,7 @@ function mountPlayroomApp({ container, roomId }) {
         }
       }
 
-      this.status = "error";
-      this.errorType = "login-error";
+      this.status = "login-error";
     },
   }).mount();
 }

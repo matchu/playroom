@@ -8,7 +8,7 @@
     <script type="module" src="scripts/app.js"></script>
   </head>
   <body>
-    <playroom-app v-scope @mounted="login">
+    <playroom-app v-scope @mounted="startPlayroom">
       <stream-panel>
         <iframe
           v-bind:src="streamState.videoEmbedUrl"
@@ -23,42 +23,33 @@
         </stream-idle-indicator>
       </stream-panel>
       <chat-panel>
-        <chat-loading-indicator
+        <chat-loading-message
           v-if="status === 'loading'"
           v-show-while-page-loading
         >
-          <chat-loading-message
-            v-if="loadingStep === 'loading'"
-            v-show-while-page-loading
-          >
-            Loading…
-          </chat-loading-message>
-          <chat-loading-message v-if="loadingStep === 'logging-in'">
-            Logging in…
-          </chat-loading-message>
-        </chat-loading-indicator>
-        <chat-error-indicator v-if="status === 'error'">
-          <chat-error-message v-if="errorType === 'login-error'">
-            <p>We're having trouble logging you into chat, sorry 😖</p>
-            <p>
-              You can come find me and ask me for help if it keeps happening!
-            </p>
-          </chat-error-message>
-          <chat-error-message v-if="errorType === 'must-agree-to-terms'">
-            <p>Hi welcome!! Excited to have you!!</p>
-            <p>
-              To use chat, you'll need to read
-              <a
-                href="terms-placeholder.html"
-                v-bind:href="termsUrl"
-                target="_blank"
-                >our chat server's terms</a
-              >
-              first, and click Agree. Come back here when you're done!
-            </p>
-            <p>You can also just hang out and watch if you want 😊</p>
-          </chat-error-message>
-        </chat-error-indicator>
+          <div>Loading…</div>
+        </chat-loading-message>
+        <chat-loading-message v-if="status === 'logging-in'">
+          <div>Logging in…</div>
+        </chat-loading-message>
+        <chat-error-message v-if="status === 'login-error'">
+          <p>We're having trouble logging you into chat, sorry 😖</p>
+          <p>You can come find me and ask me for help if it keeps happening!</p>
+        </chat-error-message>
+        <chat-error-message v-if="status === 'must-agree-to-terms'">
+          <p>Hi welcome!! Excited to have you!!</p>
+          <p>
+            To use chat, you'll need to read
+            <a
+              href="terms-placeholder.html"
+              v-bind:href="termsUrl"
+              target="_blank"
+              >our chat server's terms</a
+            >
+            first, and click Agree. Come back here when you're done!
+          </p>
+          <p>You can also just hang out and watch if you want 😊</p>
+        </chat-error-message>
         <!--
           chat-main uses v-show instead of v-if, so that it's always mounted in
           the page. That's because we start loading Hydrogen onto the page, and

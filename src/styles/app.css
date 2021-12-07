@@ -95,22 +95,22 @@ chat-panel {
 }
 
 /**
- * All three content areas take up the whole chat-panel, and are column flex
+ * All three content types take up the whole chat-panel, and are column flex
  * containers.
  */
 chat-main,
-chat-loading-indicator,
-chat-error-indicator {
+chat-loading-message,
+chat-error-message {
   grid-area: the-single-area;
   display: flex;
   flex-direction: column;
 }
 
 /**
- * The loading and error indicators center their content.
+ * The loading and error messages center their content.
  */
-chat-loading-indicator,
-chat-error-indicator {
+chat-loading-message,
+chat-error-message {
   justify-content: center;
   text-align: center;
 }
