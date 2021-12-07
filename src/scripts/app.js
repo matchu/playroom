@@ -8,7 +8,6 @@ function mountPlayroomApp({ container, roomId }) {
   const hydrogenBridge = new HydrogenBridge(container);
 
   createApp({
-    roomId,
     chat: playroom.state.chat,
     stream: playroom.state.stream,
     hydrogenLoaded: false,
