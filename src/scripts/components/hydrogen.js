@@ -1,11 +1,4 @@
 import { effect, reactive } from "../lib/petite-vue";
-import {
-  LoadStatus,
-  Platform,
-  RoomViewModel,
-  SessionContainer,
-  RoomView,
-} from "../lib/hydrogen-web";
 
 export default function Hydrogen({ playroom }) {
   const hydrogen = reactive({
@@ -16,12 +9,17 @@ export default function Hydrogen({ playroom }) {
   effect(() => {
     if (playroom.state.chat.status === "logged-in") {
       setTimeout(async () => {
+        // We import Hydrogen asynchronously, so that it doesn't block the rest
+        // of the app from setting up (and can probably download in parallel
+        // with login). We preload it in `index.html` to give it a head start!
+        const h = await import("../lib/hydrogen-web");
+
         const hydrogenContainer = document.querySelector(
           ".playroom-root .hydrogen"
         );
 
         // Set up Hydrogen with the new session…
-        const hydrogenBridge = new HydrogenBridge(hydrogenContainer);
+        const hydrogenBridge = new HydrogenBridge(h, hydrogenContainer);
         await hydrogenBridge.startWithExistingSession(
           playroom.getMatrixSessionData()
         );
@@ -40,11 +38,12 @@ export default function Hydrogen({ playroom }) {
 }
 
 class HydrogenBridge {
-  constructor(container) {
+  constructor(h, container) {
     // First, initialize the Hydrogen "platform", the layer that helps it do
     // Web stuff.
-    this.platform = new Platform(container, {});
-    this.sessionContainer = new SessionContainer({
+    this.h = h;
+    this.platform = new h.Platform(container, {});
+    this.sessionContainer = new this.h.SessionContainer({
       platform: this.platform,
     });
     monkeyPatchSessionContainer(this.sessionContainer);
@@ -82,9 +81,9 @@ class HydrogenBridge {
     this.sessionContainer.startWithExistingSession(sessionId);
     await this.sessionContainer.loadStatus.waitFor(
       (status) =>
-        status === LoadStatus.Ready ||
-        status === LoadStatus.Error ||
-        status === LoadStatus.LoginFailed
+        status === this.h.LoadStatus.Ready ||
+        status === this.h.LoadStatus.Error ||
+        status === this.h.LoadStatus.LoginFailed
     ).promise;
 
     // Check how the login went! If it went poorly, throw an error. Otherwise,
@@ -111,7 +110,7 @@ class HydrogenBridge {
       );
     }
 
-    const roomViewModel = new RoomViewModel({
+    const roomViewModel = new this.h.RoomViewModel({
       room,
       ownUserId: hydrogenSession.userId,
       platform: this.platform,
@@ -119,7 +118,7 @@ class HydrogenBridge {
     });
     await roomViewModel.load();
 
-    return new RoomView(roomViewModel);
+    return new this.h.RoomView(roomViewModel);
   }
 }
 
