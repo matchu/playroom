@@ -5,7 +5,7 @@ import {
   RoomViewModel,
   SessionContainer,
   RoomView,
-} from "hydrogen-web";
+} from "../lib/hydrogen-web";
 
 export default function Hydrogen({ playroom }) {
   const hydrogen = reactive({

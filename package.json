@@ -7,17 +7,17 @@
     "but its call site isn't getting tree shaken out so, oh well! Weird!"
   ],
   "dependencies": {
-    "fake-indexeddb": "^3.1.7",
     "hydrogen-web": "git+https://github.com/vector-im/hydrogen-web.git#semver:^0.2.22"
   },
   "devDependencies": {
+    "esbuild": "^0.14.2",
     "eslint": "^8.4.0",
     "vite": "^2.7.1"
   },
   "scripts": {
     "start": "vite --port=1234 src",
-    "build": "vite build",
-    "preview": "vite preview"
+    "build": "npm run build-hydrogen",
+    "build-hydrogen": "esbuild node_modules/hydrogen-web/src/lib.ts --bundle --format=esm --external:./node_modules/hydrogen-web/lib/node-html-parser/index.js --external:./node_modules/hydrogen-web/lib/fake-indexeddb/index.js --outfile=src/scripts/lib/hydrogen-web.js"
   },
   "author": "Matchu",
   "license": "UNLICENSED"
