@@ -8,20 +8,16 @@
   ],
   "dependencies": {
     "fake-indexeddb": "^3.1.7",
-    "hydrogen-web": "git+https://github.com/vector-im/hydrogen-web.git#semver:^0.2.22",
-    "parcel": "^2.0.1"
+    "hydrogen-web": "git+https://github.com/vector-im/hydrogen-web.git#semver:^0.2.22"
   },
   "devDependencies": {
-    "eslint": "^8.4.0"
+    "eslint": "^8.4.0",
+    "vite": "^2.7.1"
   },
-  "source": [
-    "src/index.html",
-    "src/admin/index.html"
-  ],
   "scripts": {
-    "start": "parcel",
-    "build": "parcel build",
-    "lint": "eslint src"
+    "start": "vite --port=1234 src",
+    "build": "vite build",
+    "preview": "vite preview"
   },
   "author": "Matchu",
   "license": "UNLICENSED"
