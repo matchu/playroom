@@ -1,39 +1,22 @@
 import DisplayNameForm from "./components/display-name-form";
 import Playroom from "./model/playroom";
-import HydrogenBridge from "./hydrogen-bridge";
 import { createApp } from "./lib/petite-vue";
+import Hydrogen from "./components/hydrogen";
 
-function mountPlayroomApp({ container, roomId }) {
+function mountPlayroomApp({ roomId }) {
   const playroom = new Playroom({ roomId });
-  const hydrogenBridge = new HydrogenBridge(container);
 
   createApp({
     chat: playroom.state.chat,
     stream: playroom.state.stream,
-    hydrogenLoaded: false,
     displayNameForm: DisplayNameForm({ playroom }),
-
-    async loadHydrogen(hydrogenContainer) {
-      // Set up Hydrogen with the new session, then load and mount the view.
-      await hydrogenBridge.startWithExistingSession(
-        playroom.getMatrixSessionData()
-      );
-      const view = await hydrogenBridge.createRoomView(roomId);
-      hydrogenContainer.appendChild(view.mount());
-      this.hydrogenLoaded = true;
-    },
+    hydrogen: Hydrogen({ playroom }),
   }).mount();
 
   playroom.start();
 }
 
 document.addEventListener("DOMContentLoaded", async () => {
-  const container = document.querySelector(".chat-panel");
-  if (container == null) {
-    alert("Error: Can't find the chat-panel element to mount the app into.");
-    return;
-  }
-
   const roomIdMetaTag = document.querySelector("meta[name='playroom:room-id']");
   const roomId = roomIdMetaTag?.content;
   if (roomId == null) {
@@ -45,5 +28,5 @@ document.addEventListener("DOMContentLoaded", async () => {
     return;
   }
 
-  mountPlayroomApp({ container, roomId });
+  mountPlayroomApp({ roomId });
 });

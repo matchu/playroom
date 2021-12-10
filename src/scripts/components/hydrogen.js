@@ -1,3 +1,4 @@
+import { effect, reactive } from "../lib/petite-vue";
 import {
   LoadStatus,
   Platform,
@@ -6,7 +7,37 @@ import {
   RoomView,
 } from "hydrogen-web";
 
-export default class HydrogenBridge {
+export default function Hydrogen({ playroom }) {
+  const hydrogen = reactive({
+    status: "loading",
+  });
+
+  // Wait for chat to become ready, then load and mount Hydrogen.
+  effect(() => {
+    if (playroom.state.chat.status === "ready") {
+      setTimeout(async () => {
+        const hydrogenContainer = document.querySelector(
+          ".playroom-root .hydrogen"
+        );
+
+        // Set up Hydrogen with the new session…
+        const hydrogenBridge = new HydrogenBridge(hydrogenContainer);
+        await hydrogenBridge.startWithExistingSession(
+          playroom.getMatrixSessionData()
+        );
+
+        // …then load and mount the view.
+        const view = await hydrogenBridge.createRoomView(playroom.roomId);
+        hydrogenContainer.appendChild(view.mount());
+        hydrogen.status = "ready";
+      }, 0);
+    }
+  });
+
+  return hydrogen;
+}
+
+class HydrogenBridge {
   constructor(container) {
     // First, initialize the Hydrogen "platform", the layer that helps it do
     // Web stuff.

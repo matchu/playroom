@@ -51,9 +51,19 @@
         >
           <div>Loading…</div>
         </div>
+        <!--
+          We show the "Logging in" message both when logging into chat, and
+          when we're logged in but still waiting for Hydrogen to load.
+          (Hydrogen generally loads fast enough that a separate message isn't
+          worth it, but slow enough that *not* showing this message would cause
+          a flash of empty space!)
+        -->
         <div
           class="chat-loading-message"
-          v-if="chat.status === 'logging-in' || (chat.status === 'ready' && !hydrogenLoaded)"
+          v-if="
+            chat.status === 'logging-in' ||
+              (chat.status === 'ready' && hydrogen.status === 'loading')
+          "
         >
           <div>Logging in…</div>
         </div>
@@ -76,16 +86,16 @@
           <p>You can also just hang out and watch if you want 😊</p>
         </div>
         <!--
-          chat-main uses v-show instead of v-if, so that it's always mounted in
-          the page. That's because we start loading Hydrogen onto the page, and
-          then wait for it to finish before we become "ready" and show it!
+          .chat-main uses v-show instead of v-if, so that it's always mounted
+          in the page. That's because we start loading Hydrogen onto the page
+          before we're ready to actually show it, so the .hydrogen element
+          needs to exist early!
+
+          The .hydrogen element inside here is a special element, where
+          Hydrogen will mount once we're logged in.
         -->
-        <div
-          class="chat-main"
-          v-if="chat.status === 'ready'"
-          v-show="hydrogenLoaded"
-        >
-          <div class="hydrogen" @mounted="loadHydrogen($el)" />
+        <div class="chat-main" v-show="hydrogen.status === 'ready'">
+          <div class="hydrogen" />
         </div>
       </section>
     </main>
