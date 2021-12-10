@@ -14,10 +14,10 @@
     "esbuild": "^0.14.2",
     "esbuild-plugin-svg": "^0.1.0",
     "eslint": "^8.4.0",
-    "vite": "^2.7.1"
+    "serve": "^13.0.2"
   },
   "scripts": {
-    "start": "vite --port=1234 src",
+    "start": "PORT=1234 serve src",
     "build": "node build-dependencies.js"
   },
   "author": "Matchu",

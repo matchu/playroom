@@ -1,5 +1,5 @@
-import { reactive } from "../lib/petite-vue";
-import MatrixAPI from "./matrix-api";
+import { reactive } from "../lib/petite-vue.js";
+import MatrixAPI from "./matrix-api.js";
 
 export default class MatrixClient {
   constructor({ settings }) {

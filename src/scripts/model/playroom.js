@@ -1,5 +1,5 @@
-import { reactive } from "../lib/petite-vue";
-import MatrixClient from "./matrix-client";
+import { reactive } from "../lib/petite-vue.js";
+import MatrixClient from "./matrix-client.js";
 
 export default class Playroom {
   constructor({ settings }) {

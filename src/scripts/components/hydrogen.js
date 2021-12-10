@@ -1,4 +1,4 @@
-import { effect, reactive } from "../lib/petite-vue";
+import { effect, reactive } from "../lib/petite-vue.js";
 
 export default function Hydrogen({ playroom }) {
   const hydrogen = reactive({
@@ -12,7 +12,7 @@ export default function Hydrogen({ playroom }) {
         // We import Hydrogen asynchronously, so that it doesn't block the rest
         // of the app from setting up (and can probably download in parallel
         // with login). We preload it in `index.html` to give it a head start!
-        const h = await import("../lib/hydrogen-web");
+        const h = await import("../lib/hydrogen-web.js");
 
         const hydrogenContainer = document.querySelector(
           ".playroom-root .hydrogen"
@@ -89,13 +89,15 @@ class HydrogenBridge {
     // Check how the login went! If it went poorly, throw an error. Otherwise,
     // return successfully!
     if (this.sessionContainer.loginFailure) {
+      console.error(this.sessionContainer.loginFailure);
       throw new Error(
-        `[ChatView] Hydrogen login failed: ` +
+        `[HydrogenBridge] Hydrogen login failed: ` +
           `${this.sessionContainer.loginFailure}`
       );
     } else if (this.sessionContainer.loadError) {
+      console.error(this.sessionContainer.loadError);
       throw new Error(
-        `[ChatView] Hydrogen login error: ` +
+        `[HydrogenBridge] Hydrogen login error: ` +
           `${this.sessionContainer.loadError.message}`
       );
     }
@@ -106,7 +108,7 @@ class HydrogenBridge {
     const room = hydrogenSession.rooms.get(roomId);
     if (!room) {
       throw new Error(
-        `[ChatView] Hydrogen could not find room with ID ${roomId}`
+        `[HydrogenBridge] Hydrogen could not find room with ID ${roomId}`
       );
     }
 
