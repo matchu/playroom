@@ -13,10 +13,6 @@ function mountPlayroomApp({ container, roomId }) {
     hydrogenLoaded: false,
     displayNameForm: DisplayNameForm({ playroom }),
 
-    startPlayroom() {
-      playroom.start();
-    },
-
     async loadHydrogen() {
       // Set up Hydrogen with the new session, then load and mount the view.
       await hydrogenBridge.startWithExistingSession(
@@ -27,6 +23,8 @@ function mountPlayroomApp({ container, roomId }) {
       this.hydrogenLoaded = true;
     },
   }).mount();
+
+  playroom.start();
 }
 
 document.addEventListener("DOMContentLoaded", async () => {
