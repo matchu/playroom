@@ -7,34 +7,24 @@ function mountPlayroomApp({ container, roomId }) {
   const playroom = new Playroom({ roomId });
   const hydrogenBridge = new HydrogenBridge(container);
 
-  // To let components use $refs, we pass them a proxy object that references
-  // this variable `app`. It won't be initialized when the component is created,
-  // but it will be by the time the app starts, so it should work by then!
-  // (I couldn't find a better way in the petite-vue API, ah well!)
-  let app;
-  const $refs = new Proxy({}, { get: (_, key) => app.$refs[key] });
-
   createApp({
     chat: playroom.state.chat,
     stream: playroom.state.stream,
     hydrogenLoaded: false,
-    displayNameForm: DisplayNameForm({ playroom, $refs }),
+    displayNameForm: DisplayNameForm({ playroom }),
 
-    startPlayroom() {
-      playroom.start();
-      app = this;
-    },
-
-    async loadHydrogen() {
+    async loadHydrogen(hydrogenContainer) {
       // Set up Hydrogen with the new session, then load and mount the view.
       await hydrogenBridge.startWithExistingSession(
         playroom.getMatrixSessionData()
       );
       const view = await hydrogenBridge.createRoomView(roomId);
-      this.$refs.hydrogen.appendChild(view.mount());
+      hydrogenContainer.appendChild(view.mount());
       this.hydrogenLoaded = true;
     },
   }).mount();
+
+  playroom.start();
 }
 
 document.addEventListener("DOMContentLoaded", async () => {

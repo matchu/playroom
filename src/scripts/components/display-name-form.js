@@ -1,6 +1,6 @@
 import { reactive } from "../lib/petite-vue";
 
-export default function DisplayNameForm({ playroom, $refs }) {
+export default function DisplayNameForm({ playroom }) {
   return reactive({
     _localDisplayName: null,
     isSaving: false,
@@ -17,7 +17,6 @@ export default function DisplayNameForm({ playroom, $refs }) {
     },
 
     async submit(e) {
-      console.log("form", this);
       e.preventDefault();
       this.isSaving = true;
 
@@ -34,7 +33,7 @@ export default function DisplayNameForm({ playroom, $refs }) {
       this._localDisplayName = null;
       this.isSaving = false;
 
-      $refs.displayNameInput.blur();
+      e.target.querySelector("input[type=text]").blur();
     },
   });
 }

@@ -8,7 +8,7 @@
     <script type="module" src="scripts/app.js"></script>
   </head>
   <body>
-    <main class="playroom-root" v-scope @mounted="startPlayroom">
+    <main class="playroom-root" v-scope>
       <section class="stream-panel">
         <iframe
           v-bind:src="stream.videoEmbedUrl"
@@ -37,7 +37,6 @@
                 v-model="displayNameForm.displayName"
                 v-bind:disabled="displayNameForm.isDisabled"
                 required
-                ref="displayNameInput"
               />
             </label>
             <button type="submit" v-bind:disabled="displayNameForm.isDisabled">
@@ -86,7 +85,7 @@
           v-if="chat.status === 'ready'"
           v-show="hydrogenLoaded"
         >
-          <div class="hydrogen" ref="hydrogen" @mounted="loadHydrogen" />
+          <div class="hydrogen" @mounted="loadHydrogen($el)" />
         </div>
       </section>
     </main>
