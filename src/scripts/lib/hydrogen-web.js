@@ -5,7 +5,14 @@ var __getOwnPropNames = Object.getOwnPropertyNames;
 var __getProtoOf = Object.getPrototypeOf;
 var __hasOwnProp = Object.prototype.hasOwnProperty;
 var __markAsModule = (target) => __defProp(target, "__esModule", { value: true });
-var __commonJS = (cb, mod) => function __require() {
+var __require = /* @__PURE__ */ ((x) => typeof require !== "undefined" ? require : typeof Proxy !== "undefined" ? new Proxy(x, {
+  get: (a, b) => (typeof require !== "undefined" ? require : a)[b]
+}) : x)(function(x) {
+  if (typeof require !== "undefined")
+    return require.apply(this, arguments);
+  throw new Error('Dynamic require of "' + x + '" is not supported');
+});
+var __commonJS = (cb, mod) => function __require2() {
   return mod || (0, cb[Object.keys(cb)[0]])((mod = { exports: {} }).exports, mod), mod.exports;
 };
 var __reExport = (target, module, desc) => {
@@ -19,6 +26,273 @@ var __reExport = (target, module, desc) => {
 var __toModule = (module) => {
   return __reExport(__markAsModule(__defProp(module != null ? __create(__getProtoOf(module)) : {}, "default", module && module.__esModule && "default" in module ? { get: () => module.default, enumerable: true } : { value: module, enumerable: true })), module);
 };
+
+// node_modules/another-json/another-json.js
+var require_another_json = __commonJS({
+  "node_modules/another-json/another-json.js"(exports, module) {
+    "use strict";
+    var escaped = /[\\\"\x00-\x1F]/g;
+    var escapes = {};
+    for (i = 0; i < 32; ++i) {
+      escapes[String.fromCharCode(i)] = "\\U" + ("0000" + i.toString(16)).slice(-4).toUpperCase();
+    }
+    var i;
+    escapes["\b"] = "\\b";
+    escapes["	"] = "\\t";
+    escapes["\n"] = "\\n";
+    escapes["\f"] = "\\f";
+    escapes["\r"] = "\\r";
+    escapes['"'] = '\\"';
+    escapes["\\"] = "\\\\";
+    function escapeString(value) {
+      escaped.lastIndex = 0;
+      return value.replace(escaped, function(c) {
+        return escapes[c];
+      });
+    }
+    function stringify2(value) {
+      switch (typeof value) {
+        case "string":
+          return '"' + escapeString(value) + '"';
+        case "number":
+          return isFinite(value) ? value : "null";
+        case "boolean":
+          return value;
+        case "object":
+          if (value === null) {
+            return "null";
+          }
+          if (Array.isArray(value)) {
+            return stringifyArray(value);
+          }
+          return stringifyObject(value);
+        default:
+          throw new Error("Cannot stringify: " + typeof value);
+      }
+    }
+    function stringifyArray(array) {
+      var sep = "[";
+      var result = "";
+      for (var i2 = 0; i2 < array.length; ++i2) {
+        result += sep;
+        sep = ",";
+        result += stringify2(array[i2]);
+      }
+      if (sep != ",") {
+        return "[]";
+      } else {
+        return result + "]";
+      }
+    }
+    function stringifyObject(object) {
+      var sep = "{";
+      var result = "";
+      var keys = Object.keys(object);
+      keys.sort();
+      for (var i2 = 0; i2 < keys.length; ++i2) {
+        var key = keys[i2];
+        result += sep + '"' + escapeString(key) + '":';
+        sep = ",";
+        result += stringify2(object[key]);
+      }
+      if (sep != ",") {
+        return "{}";
+      } else {
+        return result + "}";
+      }
+    }
+    module.exports = { stringify: stringify2 };
+  }
+});
+
+// node_modules/base64-arraybuffer/lib/base64-arraybuffer.js
+var require_base64_arraybuffer = __commonJS({
+  "node_modules/base64-arraybuffer/lib/base64-arraybuffer.js"(exports) {
+    (function() {
+      "use strict";
+      var chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+      var lookup = new Uint8Array(256);
+      for (var i = 0; i < chars.length; i++) {
+        lookup[chars.charCodeAt(i)] = i;
+      }
+      exports.encode = function(arraybuffer) {
+        var bytes = new Uint8Array(arraybuffer), i2, len = bytes.length, base643 = "";
+        for (i2 = 0; i2 < len; i2 += 3) {
+          base643 += chars[bytes[i2] >> 2];
+          base643 += chars[(bytes[i2] & 3) << 4 | bytes[i2 + 1] >> 4];
+          base643 += chars[(bytes[i2 + 1] & 15) << 2 | bytes[i2 + 2] >> 6];
+          base643 += chars[bytes[i2 + 2] & 63];
+        }
+        if (len % 3 === 2) {
+          base643 = base643.substring(0, base643.length - 1) + "=";
+        } else if (len % 3 === 1) {
+          base643 = base643.substring(0, base643.length - 2) + "==";
+        }
+        return base643;
+      };
+      exports.decode = function(base643) {
+        var bufferLength = base643.length * 0.75, len = base643.length, i2, p = 0, encoded1, encoded2, encoded3, encoded4;
+        if (base643[base643.length - 1] === "=") {
+          bufferLength--;
+          if (base643[base643.length - 2] === "=") {
+            bufferLength--;
+          }
+        }
+        var arraybuffer = new ArrayBuffer(bufferLength), bytes = new Uint8Array(arraybuffer);
+        for (i2 = 0; i2 < len; i2 += 4) {
+          encoded1 = lookup[base643.charCodeAt(i2)];
+          encoded2 = lookup[base643.charCodeAt(i2 + 1)];
+          encoded3 = lookup[base643.charCodeAt(i2 + 2)];
+          encoded4 = lookup[base643.charCodeAt(i2 + 3)];
+          bytes[p++] = encoded1 << 2 | encoded2 >> 4;
+          bytes[p++] = (encoded2 & 15) << 4 | encoded3 >> 2;
+          bytes[p++] = (encoded3 & 3) << 6 | encoded4 & 63;
+        }
+        return arraybuffer;
+      };
+    })();
+  }
+});
+
+// node_modules/base-x/src/index.js
+var require_src = __commonJS({
+  "node_modules/base-x/src/index.js"(exports, module) {
+    "use strict";
+    var _Buffer = __require("safe-buffer").Buffer;
+    function base(ALPHABET) {
+      if (ALPHABET.length >= 255) {
+        throw new TypeError("Alphabet too long");
+      }
+      var BASE_MAP = new Uint8Array(256);
+      for (var j = 0; j < BASE_MAP.length; j++) {
+        BASE_MAP[j] = 255;
+      }
+      for (var i = 0; i < ALPHABET.length; i++) {
+        var x = ALPHABET.charAt(i);
+        var xc = x.charCodeAt(0);
+        if (BASE_MAP[xc] !== 255) {
+          throw new TypeError(x + " is ambiguous");
+        }
+        BASE_MAP[xc] = i;
+      }
+      var BASE = ALPHABET.length;
+      var LEADER = ALPHABET.charAt(0);
+      var FACTOR = Math.log(BASE) / Math.log(256);
+      var iFACTOR = Math.log(256) / Math.log(BASE);
+      function encode(source) {
+        if (Array.isArray(source) || source instanceof Uint8Array) {
+          source = _Buffer.from(source);
+        }
+        if (!_Buffer.isBuffer(source)) {
+          throw new TypeError("Expected Buffer");
+        }
+        if (source.length === 0) {
+          return "";
+        }
+        var zeroes = 0;
+        var length = 0;
+        var pbegin = 0;
+        var pend = source.length;
+        while (pbegin !== pend && source[pbegin] === 0) {
+          pbegin++;
+          zeroes++;
+        }
+        var size = (pend - pbegin) * iFACTOR + 1 >>> 0;
+        var b58 = new Uint8Array(size);
+        while (pbegin !== pend) {
+          var carry = source[pbegin];
+          var i2 = 0;
+          for (var it1 = size - 1; (carry !== 0 || i2 < length) && it1 !== -1; it1--, i2++) {
+            carry += 256 * b58[it1] >>> 0;
+            b58[it1] = carry % BASE >>> 0;
+            carry = carry / BASE >>> 0;
+          }
+          if (carry !== 0) {
+            throw new Error("Non-zero carry");
+          }
+          length = i2;
+          pbegin++;
+        }
+        var it2 = size - length;
+        while (it2 !== size && b58[it2] === 0) {
+          it2++;
+        }
+        var str = LEADER.repeat(zeroes);
+        for (; it2 < size; ++it2) {
+          str += ALPHABET.charAt(b58[it2]);
+        }
+        return str;
+      }
+      function decodeUnsafe(source) {
+        if (typeof source !== "string") {
+          throw new TypeError("Expected String");
+        }
+        if (source.length === 0) {
+          return _Buffer.alloc(0);
+        }
+        var psz = 0;
+        var zeroes = 0;
+        var length = 0;
+        while (source[psz] === LEADER) {
+          zeroes++;
+          psz++;
+        }
+        var size = (source.length - psz) * FACTOR + 1 >>> 0;
+        var b256 = new Uint8Array(size);
+        while (source[psz]) {
+          var carry = BASE_MAP[source.charCodeAt(psz)];
+          if (carry === 255) {
+            return;
+          }
+          var i2 = 0;
+          for (var it3 = size - 1; (carry !== 0 || i2 < length) && it3 !== -1; it3--, i2++) {
+            carry += BASE * b256[it3] >>> 0;
+            b256[it3] = carry % 256 >>> 0;
+            carry = carry / 256 >>> 0;
+          }
+          if (carry !== 0) {
+            throw new Error("Non-zero carry");
+          }
+          length = i2;
+          psz++;
+        }
+        var it4 = size - length;
+        while (it4 !== size && b256[it4] === 0) {
+          it4++;
+        }
+        var vch = _Buffer.allocUnsafe(zeroes + (size - it4));
+        vch.fill(0, 0, zeroes);
+        var j2 = zeroes;
+        while (it4 !== size) {
+          vch[j2++] = b256[it4++];
+        }
+        return vch;
+      }
+      function decode(string) {
+        var buffer = decodeUnsafe(string);
+        if (buffer) {
+          return buffer;
+        }
+        throw new Error("Non-base" + BASE + " character");
+      }
+      return {
+        encode,
+        decodeUnsafe,
+        decode
+      };
+    }
+    module.exports = base;
+  }
+});
+
+// node_modules/bs58/index.js
+var require_bs58 = __commonJS({
+  "node_modules/bs58/index.js"(exports, module) {
+    var basex = require_src();
+    var ALPHABET = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz";
+    module.exports = basex(ALPHABET);
+  }
+});
 
 // node_modules/dompurify/dist/purify.js
 var require_purify = __commonJS({
@@ -137,12 +411,12 @@ var require_purify = __commonJS({
       }
       var html = freeze(["a", "abbr", "acronym", "address", "area", "article", "aside", "audio", "b", "bdi", "bdo", "big", "blink", "blockquote", "body", "br", "button", "canvas", "caption", "center", "cite", "code", "col", "colgroup", "content", "data", "datalist", "dd", "decorator", "del", "details", "dfn", "dialog", "dir", "div", "dl", "dt", "element", "em", "fieldset", "figcaption", "figure", "font", "footer", "form", "h1", "h2", "h3", "h4", "h5", "h6", "head", "header", "hgroup", "hr", "html", "i", "img", "input", "ins", "kbd", "label", "legend", "li", "main", "map", "mark", "marquee", "menu", "menuitem", "meter", "nav", "nobr", "ol", "optgroup", "option", "output", "p", "picture", "pre", "progress", "q", "rp", "rt", "ruby", "s", "samp", "section", "select", "shadow", "small", "source", "spacer", "span", "strike", "strong", "style", "sub", "summary", "sup", "table", "tbody", "td", "template", "textarea", "tfoot", "th", "thead", "time", "tr", "track", "tt", "u", "ul", "var", "video", "wbr"]);
       var svg = freeze(["svg", "a", "altglyph", "altglyphdef", "altglyphitem", "animatecolor", "animatemotion", "animatetransform", "circle", "clippath", "defs", "desc", "ellipse", "filter", "font", "g", "glyph", "glyphref", "hkern", "image", "line", "lineargradient", "marker", "mask", "metadata", "mpath", "path", "pattern", "polygon", "polyline", "radialgradient", "rect", "stop", "style", "switch", "symbol", "text", "textpath", "title", "tref", "tspan", "view", "vkern"]);
-      var svgFilters = freeze(["feBlend", "feColorMatrix", "feComponentTransfer", "feComposite", "feConvolveMatrix", "feDiffuseLighting", "feDisplacementMap", "feDistantLight", "feFlood", "feFuncA", "feFuncB", "feFuncG", "feFuncR", "feGaussianBlur", "feMerge", "feMergeNode", "feMorphology", "feOffset", "fePointLight", "feSpecularLighting", "feSpotLight", "feTile", "feTurbulence"]);
-      var svgDisallowed = freeze(["animate", "color-profile", "cursor", "discard", "fedropshadow", "feimage", "font-face", "font-face-format", "font-face-name", "font-face-src", "font-face-uri", "foreignobject", "hatch", "hatchpath", "mesh", "meshgradient", "meshpatch", "meshrow", "missing-glyph", "script", "set", "solidcolor", "unknown", "use"]);
+      var svgFilters = freeze(["feBlend", "feColorMatrix", "feComponentTransfer", "feComposite", "feConvolveMatrix", "feDiffuseLighting", "feDisplacementMap", "feDistantLight", "feFlood", "feFuncA", "feFuncB", "feFuncG", "feFuncR", "feGaussianBlur", "feImage", "feMerge", "feMergeNode", "feMorphology", "feOffset", "fePointLight", "feSpecularLighting", "feSpotLight", "feTile", "feTurbulence"]);
+      var svgDisallowed = freeze(["animate", "color-profile", "cursor", "discard", "fedropshadow", "font-face", "font-face-format", "font-face-name", "font-face-src", "font-face-uri", "foreignobject", "hatch", "hatchpath", "mesh", "meshgradient", "meshpatch", "meshrow", "missing-glyph", "script", "set", "solidcolor", "unknown", "use"]);
       var mathMl = freeze(["math", "menclose", "merror", "mfenced", "mfrac", "mglyph", "mi", "mlabeledtr", "mmultiscripts", "mn", "mo", "mover", "mpadded", "mphantom", "mroot", "mrow", "ms", "mspace", "msqrt", "mstyle", "msub", "msup", "msubsup", "mtable", "mtd", "mtext", "mtr", "munder", "munderover"]);
       var mathMlDisallowed = freeze(["maction", "maligngroup", "malignmark", "mlongdiv", "mscarries", "mscarry", "msgroup", "mstack", "msline", "msrow", "semantics", "annotation", "annotation-xml", "mprescripts", "none"]);
       var text2 = freeze(["#text"]);
-      var html$1 = freeze(["accept", "action", "align", "alt", "autocapitalize", "autocomplete", "autopictureinpicture", "autoplay", "background", "bgcolor", "border", "capture", "cellpadding", "cellspacing", "checked", "cite", "class", "clear", "color", "cols", "colspan", "controls", "controlslist", "coords", "crossorigin", "datetime", "decoding", "default", "dir", "disabled", "disablepictureinpicture", "disableremoteplayback", "download", "draggable", "enctype", "enterkeyhint", "face", "for", "headers", "height", "hidden", "high", "href", "hreflang", "id", "inputmode", "integrity", "ismap", "kind", "label", "lang", "list", "loading", "loop", "low", "max", "maxlength", "media", "method", "min", "minlength", "multiple", "muted", "name", "noshade", "novalidate", "nowrap", "open", "optimum", "pattern", "placeholder", "playsinline", "poster", "preload", "pubdate", "radiogroup", "readonly", "rel", "required", "rev", "reversed", "role", "rows", "rowspan", "spellcheck", "scope", "selected", "shape", "size", "sizes", "span", "srclang", "start", "src", "srcset", "step", "style", "summary", "tabindex", "title", "translate", "type", "usemap", "valign", "value", "width", "xmlns", "slot"]);
+      var html$1 = freeze(["accept", "action", "align", "alt", "autocapitalize", "autocomplete", "autopictureinpicture", "autoplay", "background", "bgcolor", "border", "capture", "cellpadding", "cellspacing", "checked", "cite", "class", "clear", "color", "cols", "colspan", "controls", "controlslist", "coords", "crossorigin", "datetime", "decoding", "default", "dir", "disabled", "disablepictureinpicture", "disableremoteplayback", "download", "draggable", "enctype", "enterkeyhint", "face", "for", "headers", "height", "hidden", "high", "href", "hreflang", "id", "inputmode", "integrity", "ismap", "kind", "label", "lang", "list", "loading", "loop", "low", "max", "maxlength", "media", "method", "min", "minlength", "multiple", "muted", "name", "nonce", "noshade", "novalidate", "nowrap", "open", "optimum", "pattern", "placeholder", "playsinline", "poster", "preload", "pubdate", "radiogroup", "readonly", "rel", "required", "rev", "reversed", "role", "rows", "rowspan", "spellcheck", "scope", "selected", "shape", "size", "sizes", "span", "srclang", "start", "src", "srcset", "step", "style", "summary", "tabindex", "title", "translate", "type", "usemap", "valign", "value", "width", "xmlns", "slot"]);
       var svg$1 = freeze(["accent-height", "accumulate", "additive", "alignment-baseline", "ascent", "attributename", "attributetype", "azimuth", "basefrequency", "baseline-shift", "begin", "bias", "by", "class", "clip", "clippathunits", "clip-path", "clip-rule", "color", "color-interpolation", "color-interpolation-filters", "color-profile", "color-rendering", "cx", "cy", "d", "dx", "dy", "diffuseconstant", "direction", "display", "divisor", "dur", "edgemode", "elevation", "end", "fill", "fill-opacity", "fill-rule", "filter", "filterunits", "flood-color", "flood-opacity", "font-family", "font-size", "font-size-adjust", "font-stretch", "font-style", "font-variant", "font-weight", "fx", "fy", "g1", "g2", "glyph-name", "glyphref", "gradientunits", "gradienttransform", "height", "href", "id", "image-rendering", "in", "in2", "k", "k1", "k2", "k3", "k4", "kerning", "keypoints", "keysplines", "keytimes", "lang", "lengthadjust", "letter-spacing", "kernelmatrix", "kernelunitlength", "lighting-color", "local", "marker-end", "marker-mid", "marker-start", "markerheight", "markerunits", "markerwidth", "maskcontentunits", "maskunits", "max", "mask", "media", "method", "mode", "min", "name", "numoctaves", "offset", "operator", "opacity", "order", "orient", "orientation", "origin", "overflow", "paint-order", "path", "pathlength", "patterncontentunits", "patterntransform", "patternunits", "points", "preservealpha", "preserveaspectratio", "primitiveunits", "r", "rx", "ry", "radius", "refx", "refy", "repeatcount", "repeatdur", "restart", "result", "rotate", "scale", "seed", "shape-rendering", "specularconstant", "specularexponent", "spreadmethod", "startoffset", "stddeviation", "stitchtiles", "stop-color", "stop-opacity", "stroke-dasharray", "stroke-dashoffset", "stroke-linecap", "stroke-linejoin", "stroke-miterlimit", "stroke-opacity", "stroke", "stroke-width", "style", "surfacescale", "systemlanguage", "tabindex", "targetx", "targety", "transform", "text-anchor", "text-decoration", "text-rendering", "textlength", "type", "u1", "u2", "unicode", "values", "viewbox", "visibility", "version", "vert-adv-y", "vert-origin-x", "vert-origin-y", "width", "word-spacing", "wrap", "writing-mode", "xchannelselector", "ychannelselector", "x", "x1", "x2", "xmlns", "y", "y1", "y2", "z", "zoomandpan"]);
       var mathMl$1 = freeze(["accent", "accentunder", "align", "bevelled", "close", "columnsalign", "columnlines", "columnspan", "denomalign", "depth", "dir", "display", "displaystyle", "encoding", "fence", "frame", "height", "href", "id", "largeop", "length", "linethickness", "lspace", "lquote", "mathbackground", "mathcolor", "mathsize", "mathvariant", "maxsize", "minsize", "movablelimits", "notation", "numalign", "open", "rowalign", "rowlines", "rowspacing", "rowspan", "rspace", "rquote", "scriptlevel", "scriptminsize", "scriptsizemultiplier", "selection", "separator", "separators", "stretchy", "subscriptshift", "supscriptshift", "symmetric", "voffset", "width", "xmlns"]);
       var xml = freeze(["xlink:href", "xml:id", "xlink:title", "xml:space", "xmlns:xlink"]);
@@ -197,7 +471,7 @@ var require_purify = __commonJS({
         var DOMPurify2 = function DOMPurify3(root) {
           return createDOMPurify(root);
         };
-        DOMPurify2.version = "2.3.3";
+        DOMPurify2.version = "2.3.4";
         DOMPurify2.removed = [];
         if (!window2 || !window2.document || window2.document.nodeType !== 9) {
           DOMPurify2.isSupported = false;
@@ -205,7 +479,7 @@ var require_purify = __commonJS({
         }
         var originalDocument = window2.document;
         var document2 = window2.document;
-        var DocumentFragment = window2.DocumentFragment, HTMLTemplateElement = window2.HTMLTemplateElement, Node2 = window2.Node, Element = window2.Element, NodeFilter = window2.NodeFilter, _window$NamedNodeMap = window2.NamedNodeMap, NamedNodeMap = _window$NamedNodeMap === void 0 ? window2.NamedNodeMap || window2.MozNamedAttrMap : _window$NamedNodeMap, Text = window2.Text, Comment = window2.Comment, DOMParser2 = window2.DOMParser, trustedTypes = window2.trustedTypes;
+        var DocumentFragment = window2.DocumentFragment, HTMLTemplateElement = window2.HTMLTemplateElement, Node2 = window2.Node, Element = window2.Element, NodeFilter = window2.NodeFilter, _window$NamedNodeMap = window2.NamedNodeMap, NamedNodeMap = _window$NamedNodeMap === void 0 ? window2.NamedNodeMap || window2.MozNamedAttrMap : _window$NamedNodeMap, HTMLFormElement = window2.HTMLFormElement, DOMParser2 = window2.DOMParser, trustedTypes = window2.trustedTypes;
         var ElementPrototype = Element.prototype;
         var cloneNode = lookupGetter(ElementPrototype, "cloneNode");
         var getNextSibling = lookupGetter(ElementPrototype, "nextSibling");
@@ -234,6 +508,26 @@ var require_purify = __commonJS({
         var DEFAULT_ALLOWED_TAGS = addToSet({}, [].concat(_toConsumableArray$1(html), _toConsumableArray$1(svg), _toConsumableArray$1(svgFilters), _toConsumableArray$1(mathMl), _toConsumableArray$1(text2)));
         var ALLOWED_ATTR = null;
         var DEFAULT_ALLOWED_ATTR = addToSet({}, [].concat(_toConsumableArray$1(html$1), _toConsumableArray$1(svg$1), _toConsumableArray$1(mathMl$1), _toConsumableArray$1(xml)));
+        var CUSTOM_ELEMENT_HANDLING = Object.seal(Object.create(null, {
+          tagNameCheck: {
+            writable: true,
+            configurable: false,
+            enumerable: true,
+            value: null
+          },
+          attributeNameCheck: {
+            writable: true,
+            configurable: false,
+            enumerable: true,
+            value: null
+          },
+          allowCustomizedBuiltInElements: {
+            writable: true,
+            configurable: false,
+            enumerable: true,
+            value: false
+          }
+        }));
         var FORBID_TAGS = null;
         var FORBID_ATTR = null;
         var ALLOW_ARIA_ATTR = true;
@@ -245,7 +539,6 @@ var require_purify = __commonJS({
         var FORCE_BODY = false;
         var RETURN_DOM = false;
         var RETURN_DOM_FRAGMENT = false;
-        var RETURN_DOM_IMPORT = true;
         var RETURN_TRUSTED_TYPE = false;
         var SANITIZE_DOM = true;
         var KEEP_CONTENT = true;
@@ -268,6 +561,9 @@ var require_purify = __commonJS({
         var transformCaseFunc = void 0;
         var CONFIG = null;
         var formElement = document2.createElement("form");
+        var isRegexOrFunction = function isRegexOrFunction2(testValue) {
+          return testValue instanceof RegExp || testValue instanceof Function;
+        };
         var _parseConfig = function _parseConfig2(cfg) {
           if (CONFIG && CONFIG === cfg) {
             return;
@@ -291,7 +587,6 @@ var require_purify = __commonJS({
           WHOLE_DOCUMENT = cfg.WHOLE_DOCUMENT || false;
           RETURN_DOM = cfg.RETURN_DOM || false;
           RETURN_DOM_FRAGMENT = cfg.RETURN_DOM_FRAGMENT || false;
-          RETURN_DOM_IMPORT = cfg.RETURN_DOM_IMPORT !== false;
           RETURN_TRUSTED_TYPE = cfg.RETURN_TRUSTED_TYPE || false;
           FORCE_BODY = cfg.FORCE_BODY || false;
           SANITIZE_DOM = cfg.SANITIZE_DOM !== false;
@@ -299,6 +594,15 @@ var require_purify = __commonJS({
           IN_PLACE = cfg.IN_PLACE || false;
           IS_ALLOWED_URI$$1 = cfg.ALLOWED_URI_REGEXP || IS_ALLOWED_URI$$1;
           NAMESPACE = cfg.NAMESPACE || HTML_NAMESPACE;
+          if (cfg.CUSTOM_ELEMENT_HANDLING && isRegexOrFunction(cfg.CUSTOM_ELEMENT_HANDLING.tagNameCheck)) {
+            CUSTOM_ELEMENT_HANDLING.tagNameCheck = cfg.CUSTOM_ELEMENT_HANDLING.tagNameCheck;
+          }
+          if (cfg.CUSTOM_ELEMENT_HANDLING && isRegexOrFunction(cfg.CUSTOM_ELEMENT_HANDLING.attributeNameCheck)) {
+            CUSTOM_ELEMENT_HANDLING.attributeNameCheck = cfg.CUSTOM_ELEMENT_HANDLING.attributeNameCheck;
+          }
+          if (cfg.CUSTOM_ELEMENT_HANDLING && typeof cfg.CUSTOM_ELEMENT_HANDLING.allowCustomizedBuiltInElements === "boolean") {
+            CUSTOM_ELEMENT_HANDLING.allowCustomizedBuiltInElements = cfg.CUSTOM_ELEMENT_HANDLING.allowCustomizedBuiltInElements;
+          }
           PARSER_MEDIA_TYPE = SUPPORTED_PARSER_MEDIA_TYPES.indexOf(cfg.PARSER_MEDIA_TYPE) === -1 ? PARSER_MEDIA_TYPE = DEFAULT_PARSER_MEDIA_TYPE : PARSER_MEDIA_TYPE = cfg.PARSER_MEDIA_TYPE;
           transformCaseFunc = PARSER_MEDIA_TYPE === "application/xhtml+xml" ? function(x) {
             return x;
@@ -493,13 +797,7 @@ var require_purify = __commonJS({
           return createNodeIterator.call(root.ownerDocument || root, root, NodeFilter.SHOW_ELEMENT | NodeFilter.SHOW_COMMENT | NodeFilter.SHOW_TEXT, null, false);
         };
         var _isClobbered = function _isClobbered2(elm) {
-          if (elm instanceof Text || elm instanceof Comment) {
-            return false;
-          }
-          if (typeof elm.nodeName !== "string" || typeof elm.textContent !== "string" || typeof elm.removeChild !== "function" || !(elm.attributes instanceof NamedNodeMap) || typeof elm.removeAttribute !== "function" || typeof elm.setAttribute !== "function" || typeof elm.namespaceURI !== "string" || typeof elm.insertBefore !== "function") {
-            return true;
-          }
-          return false;
+          return elm instanceof HTMLFormElement && (typeof elm.nodeName !== "string" || typeof elm.textContent !== "string" || typeof elm.removeChild !== "function" || !(elm.attributes instanceof NamedNodeMap) || typeof elm.removeAttribute !== "function" || typeof elm.setAttribute !== "function" || typeof elm.namespaceURI !== "string" || typeof elm.insertBefore !== "function");
         };
         var _isNode = function _isNode2(object) {
           return (typeof Node2 === "undefined" ? "undefined" : _typeof(Node2)) === "object" ? object instanceof Node2 : object && (typeof object === "undefined" ? "undefined" : _typeof(object)) === "object" && typeof object.nodeType === "number" && typeof object.nodeName === "string";
@@ -547,6 +845,12 @@ var require_purify = __commonJS({
                 }
               }
             }
+            if (!FORBID_TAGS[tagName] && _basicCustomElementTest(tagName)) {
+              if (CUSTOM_ELEMENT_HANDLING.tagNameCheck instanceof RegExp && regExpTest(CUSTOM_ELEMENT_HANDLING.tagNameCheck, tagName))
+                return false;
+              if (CUSTOM_ELEMENT_HANDLING.tagNameCheck instanceof Function && CUSTOM_ELEMENT_HANDLING.tagNameCheck(tagName))
+                return false;
+            }
             _forceRemove(currentNode);
             return true;
           }
@@ -579,7 +883,11 @@ var require_purify = __commonJS({
           else if (ALLOW_ARIA_ATTR && regExpTest(ARIA_ATTR$$1, lcName))
             ;
           else if (!ALLOWED_ATTR[lcName] || FORBID_ATTR[lcName]) {
-            return false;
+            if (_basicCustomElementTest(lcTag) && (CUSTOM_ELEMENT_HANDLING.tagNameCheck instanceof RegExp && regExpTest(CUSTOM_ELEMENT_HANDLING.tagNameCheck, lcTag) || CUSTOM_ELEMENT_HANDLING.tagNameCheck instanceof Function && CUSTOM_ELEMENT_HANDLING.tagNameCheck(lcTag)) && (CUSTOM_ELEMENT_HANDLING.attributeNameCheck instanceof RegExp && regExpTest(CUSTOM_ELEMENT_HANDLING.attributeNameCheck, lcName) || CUSTOM_ELEMENT_HANDLING.attributeNameCheck instanceof Function && CUSTOM_ELEMENT_HANDLING.attributeNameCheck(lcName)) || lcName === "is" && CUSTOM_ELEMENT_HANDLING.allowCustomizedBuiltInElements && (CUSTOM_ELEMENT_HANDLING.tagNameCheck instanceof RegExp && regExpTest(CUSTOM_ELEMENT_HANDLING.tagNameCheck, value) || CUSTOM_ELEMENT_HANDLING.tagNameCheck instanceof Function && CUSTOM_ELEMENT_HANDLING.tagNameCheck(value)))
+              ;
+            else {
+              return false;
+            }
           } else if (URI_SAFE_ATTRIBUTES[lcName])
             ;
           else if (regExpTest(IS_ALLOWED_URI$$1, stringReplace(value, ATTR_WHITESPACE$$1, "")))
@@ -594,6 +902,9 @@ var require_purify = __commonJS({
             return false;
           }
           return true;
+        };
+        var _basicCustomElementTest = function _basicCustomElementTest2(tagName) {
+          return tagName.indexOf("-") > 0;
         };
         var _sanitizeAttributes = function _sanitizeAttributes2(currentNode) {
           var attr = void 0;
@@ -759,7 +1070,7 @@ var require_purify = __commonJS({
             } else {
               returnNode = body;
             }
-            if (RETURN_DOM_IMPORT) {
+            if (ALLOWED_ATTR.shadowroot) {
               returnNode = importNode.call(originalDocument, returnNode, true);
             }
             return returnNode;
@@ -815,13 +1126,10 @@ var require_purify = __commonJS({
   }
 });
 
-// node_modules/hydrogen-web/src/utils/enum.js
+// node_modules/hydrogen-web/src/utils/enum.ts
 function createEnum(...values) {
   const obj = {};
   for (const value of values) {
-    if (typeof value !== "string") {
-      throw new Error("Invalid enum value name" + value?.toString());
-    }
     obj[value] = value;
   }
   return Object.freeze(obj);
@@ -877,7 +1185,7 @@ var AbortableOperation = class {
   }
 };
 
-// node_modules/hydrogen-web/src/utils/error.js
+// node_modules/hydrogen-web/src/utils/error.ts
 var AbortError = class extends Error {
   get name() {
     return "AbortError";
@@ -1418,11 +1726,11 @@ async function decryptAttachment(platform, ciphertextBuffer, info) {
     throw new Error("Invalid info. Missing info.key, info.iv or info.hashes.sha256 key");
   }
   const { crypto: crypto2 } = platform;
-  const { base64 } = platform.encoding;
-  var ivArray = base64.decode(info.iv);
-  var expectedSha256base64 = base64.encode(base64.decode(info.hashes.sha256));
+  const { base64: base643 } = platform.encoding;
+  var ivArray = base643.decode(info.iv);
+  var expectedSha256base64 = base643.encode(base643.decode(info.hashes.sha256));
   const digestResult = await crypto2.digest("SHA-256", ciphertextBuffer);
-  if (base64.encode(new Uint8Array(digestResult)) != expectedSha256base64) {
+  if (base643.encode(new Uint8Array(digestResult)) != expectedSha256base64) {
     throw new Error("Mismatched SHA-256 digest");
   }
   var counterLength;
@@ -1441,20 +1749,20 @@ async function decryptAttachment(platform, ciphertextBuffer, info) {
 }
 async function encryptAttachment(platform, blob) {
   const { crypto: crypto2 } = platform;
-  const { base64 } = platform.encoding;
+  const { base64: base643 } = platform.encoding;
   const iv = await crypto2.aes.generateIV();
   const key = await crypto2.aes.generateKey("jwk", 256);
-  const buffer2 = await blob.readAsBuffer();
-  const ciphertext = await crypto2.aes.encryptCTR({ jwkKey: key, iv, data: buffer2 });
+  const buffer = await blob.readAsBuffer();
+  const ciphertext = await crypto2.aes.encryptCTR({ jwkKey: key, iv, data: buffer });
   const digest = await crypto2.digest("SHA-256", ciphertext);
   return {
     blob: platform.createBlob(ciphertext, "application/octet-stream"),
     info: {
       v: "v2",
       key,
-      iv: base64.encodeUnpadded(iv),
+      iv: base643.encodeUnpadded(iv),
       hashes: {
-        sha256: base64.encodeUnpadded(digest)
+        sha256: base643.encodeUnpadded(digest)
       }
     }
   };
@@ -1500,8 +1808,8 @@ var MediaRepository = class {
   }
   async downloadPlaintextFile(mxcUrl, mimetype, cache = false) {
     const url = this.mxcUrl(mxcUrl);
-    const { body: buffer2 } = await this._platform.request(url, { method: "GET", format: "buffer", cache }).response();
-    return this._platform.createBlob(buffer2, mimetype);
+    const { body: buffer } = await this._platform.request(url, { method: "GET", format: "buffer", cache }).response();
+    return this._platform.createBlob(buffer, mimetype);
   }
   async downloadAttachment(content, cache = false) {
     if (content.file) {
@@ -2033,80 +2341,8 @@ var EventEmitter = class {
   }
 };
 
-// node_modules/hydrogen-web/lib/another-json/index.js
-var escaped = /[\\\"\x00-\x1F]/g;
-var escapes = {};
-for (i = 0; i < 32; ++i) {
-  escapes[String.fromCharCode(i)] = "\\U" + ("0000" + i.toString(16)).slice(-4).toUpperCase();
-}
-var i;
-escapes["\b"] = "\\b";
-escapes["	"] = "\\t";
-escapes["\n"] = "\\n";
-escapes["\f"] = "\\f";
-escapes["\r"] = "\\r";
-escapes['"'] = '\\"';
-escapes["\\"] = "\\\\";
-function escapeString(value) {
-  escaped.lastIndex = 0;
-  return value.replace(escaped, function(c) {
-    return escapes[c];
-  });
-}
-function stringify(value) {
-  switch (typeof value) {
-    case "string":
-      return '"' + escapeString(value) + '"';
-    case "number":
-      return isFinite(value) ? value : "null";
-    case "boolean":
-      return value;
-    case "object":
-      if (value === null) {
-        return "null";
-      }
-      if (Array.isArray(value)) {
-        return stringifyArray(value);
-      }
-      return stringifyObject(value);
-    default:
-      throw new Error("Cannot stringify: " + typeof value);
-  }
-}
-function stringifyArray(array) {
-  var sep = "[";
-  var result = "";
-  for (var i = 0; i < array.length; ++i) {
-    result += sep;
-    sep = ",";
-    result += stringify(array[i]);
-  }
-  if (sep != ",") {
-    return "[]";
-  } else {
-    return result + "]";
-  }
-}
-function stringifyObject(object) {
-  var sep = "{";
-  var result = "";
-  var keys = Object.keys(object);
-  keys.sort();
-  for (var i = 0; i < keys.length; ++i) {
-    var key = keys[i];
-    result += sep + '"' + escapeString(key) + '":';
-    sep = ",";
-    result += stringify(object[key]);
-  }
-  if (sep != ",") {
-    return "{}";
-  } else {
-    return result + "}";
-  }
-}
-var anotherJson = { stringify };
-
 // node_modules/hydrogen-web/src/matrix/e2ee/common.js
+var import_another_json = __toModule(require_another_json());
 var DecryptionSource = createEnum("Sync", "Timeline", "Retry");
 var SESSION_E2EE_KEY_PREFIX = "e2ee:";
 var OLM_ALGORITHM = "m.olm.v1.curve25519-aes-sha2";
@@ -2124,7 +2360,7 @@ function verifyEd25519Signature(olmUtil, userId, deviceOrKeyId, ed25519Key, valu
   const clone = Object.assign({}, value);
   delete clone.unsigned;
   delete clone.signatures;
-  const canonicalJson = anotherJson.stringify(clone);
+  const canonicalJson = import_another_json.default.stringify(clone);
   const signature = value?.signatures?.[userId]?.[`${SIGNATURE_ALGORITHM}:${deviceOrKeyId}`];
   try {
     if (!signature) {
@@ -3424,9 +3660,6 @@ var FragmentIdComparer = class {
   }
 };
 
-// node_modules/hydrogen-web/src/mocks/Storage.ts
-import { FDBFactory, FDBKeyRange } from "../../../node_modules/hydrogen-web/lib/fake-indexeddb/index.js";
-
 // node_modules/hydrogen-web/src/matrix/storage/idb/error.ts
 function _sourceName(source) {
   return "objectStore" in source ? `${source.objectStore.name}.${source.name}` : source.name;
@@ -3940,7 +4173,7 @@ var Store = class extends QueryTarget {
 };
 
 // node_modules/hydrogen-web/src/utils/typedJSON.ts
-function stringify2(value) {
+function stringify(value) {
   return JSON.stringify(encodeValue(value));
 }
 function parse(value) {
@@ -4022,7 +4255,7 @@ var SessionStore = class {
   _writeKeyToLocalStorage(key, value) {
     try {
       const lsKey = this._localStorageKeyPrefix + key;
-      const lsValue = stringify2(value);
+      const lsValue = stringify(value);
       this._localStorage.setItem(lsKey, lsValue);
     } catch (err) {
       console.error("could not write to localStorage", err);
@@ -6457,7 +6690,7 @@ var BaseObservableList = class extends BaseObservable {
   }
 };
 
-// node_modules/hydrogen-web/src/utils/sortedIndex.js
+// node_modules/hydrogen-web/src/utils/sortedIndex.ts
 function sortedIndex(array, value, comparator) {
   let low = 0;
   let high = array.length;
@@ -6981,7 +7214,7 @@ var SourceSubscriptionHandler = class {
   }
 };
 
-// node_modules/hydrogen-web/src/observable/list/ObservableArray.js
+// node_modules/hydrogen-web/src/observable/list/ObservableArray.ts
 var ObservableArray = class extends BaseObservableList {
   constructor(initialValues = []) {
     super();
@@ -7048,12 +7281,12 @@ function findAndUpdateInArray(predicate, array, observable, updater) {
   return false;
 }
 
-// node_modules/hydrogen-web/src/observable/list/SortedArray.js
+// node_modules/hydrogen-web/src/observable/list/SortedArray.ts
 var SortedArray = class extends BaseObservableList {
   constructor(comparator) {
     super();
-    this._comparator = comparator;
     this._items = [];
+    this._comparator = comparator;
   }
   setManyUnsorted(items) {
     this.setManySorted(items);
@@ -7200,11 +7433,12 @@ function runReset(list) {
   list.emitReset();
 }
 
-// node_modules/hydrogen-web/src/observable/list/AsyncMappedList.js
+// node_modules/hydrogen-web/src/observable/list/AsyncMappedList.ts
 var AsyncMappedList = class extends BaseMappedList {
-  constructor(sourceList, mapper, updater, removeCallback) {
-    super(sourceList, mapper, updater, removeCallback);
+  constructor() {
+    super(...arguments);
     this._eventQueue = null;
+    this._flushing = false;
   }
   onSubscribeFirst() {
     this._sourceUnsubscribe = this._sourceList.subscribe(this);
@@ -7310,12 +7544,12 @@ var ResetEvent = class {
   }
 };
 
-// node_modules/hydrogen-web/src/observable/list/ConcatList.js
+// node_modules/hydrogen-web/src/observable/list/ConcatList.ts
 var ConcatList = class extends BaseObservableList {
   constructor(...sourceLists) {
     super();
-    this._sourceLists = sourceLists;
     this._sourceUnsubscribes = null;
+    this._sourceLists = sourceLists;
   }
   _offsetForSource(sourceList) {
     const listIdx = this._sourceLists.indexOf(sourceList);
@@ -7400,7 +7634,7 @@ Object.assign(BaseObservableMap.prototype, {
   }
 });
 
-// node_modules/hydrogen-web/src/utils/Disposables.js
+// node_modules/hydrogen-web/src/utils/Disposables.ts
 function disposeValue(value) {
   if (typeof value === "function") {
     value();
@@ -7428,6 +7662,10 @@ var Disposables = class {
     return disposable;
   }
   untrack(disposable) {
+    if (this.isDisposed) {
+      console.warn("Disposables already disposed, cannot untrack");
+      return null;
+    }
     const idx = this._disposables.indexOf(disposable);
     if (idx >= 0) {
       this._disposables.splice(idx, 1);
@@ -7893,11 +8131,11 @@ async function fetchMember({ roomId, userId, hsApi, storage }, log) {
   return member;
 }
 
-// node_modules/hydrogen-web/src/utils/RetainedValue.js
+// node_modules/hydrogen-web/src/utils/RetainedValue.ts
 var RetainedValue = class {
   constructor(freeCallback) {
-    this._freeCallback = freeCallback;
     this._retentionCount = 1;
+    this._freeCallback = freeCallback;
   }
   retain() {
     this._retentionCount += 1;
@@ -9847,6 +10085,7 @@ var SyncPreparation = class {
 };
 
 // node_modules/hydrogen-web/src/matrix/e2ee/Account.js
+var import_another_json2 = __toModule(require_another_json());
 var ACCOUNT_SESSION_KEY = SESSION_E2EE_KEY_PREFIX + "olmAccount";
 var DEVICE_KEY_FLAG_SESSION_KEY = SESSION_E2EE_KEY_PREFIX + "areDeviceKeysUploaded";
 var SERVER_OTK_COUNT_SESSION_KEY = SESSION_E2EE_KEY_PREFIX + "serverOTKCount";
@@ -10091,7 +10330,7 @@ var Account = class {
     delete obj.signatures;
     delete obj.unsigned;
     sigs[this._userId] = sigs[this._userId] || {};
-    sigs[this._userId]["ed25519:" + this._deviceId] = this._account.sign(anotherJson.stringify(obj));
+    sigs[this._userId]["ed25519:" + this._deviceId] = this._account.sign(import_another_json2.default.stringify(obj));
     obj.signatures = sigs;
     if (unsigned !== void 0) {
       obj.unsigned = unsigned;
@@ -10161,9 +10400,9 @@ var Key = class {
 };
 async function calculateKeyMac(key, ivStr, platform) {
   const { crypto: crypto2, encoding } = platform;
-  const { utf8, base64 } = encoding;
+  const { utf8, base64: base643 } = encoding;
   const { derive, aes, hmac } = crypto2;
-  const iv = base64.decode(ivStr);
+  const iv = base643.decode(ivStr);
   const zerosalt = new Uint8Array(8);
   const ZERO_STR = "\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0";
   const info = utf8.encode("");
@@ -10172,7 +10411,7 @@ async function calculateKeyMac(key, ivStr, platform) {
   const hmacKey = keybits.slice(32);
   const ciphertext = await aes.encryptCTR({ key: aesKey, iv, data: utf8.encode(ZERO_STR) });
   const mac = await hmac.compute(hmacKey, ciphertext, "SHA-256");
-  return base64.encode(mac);
+  return base643.encode(mac);
 }
 
 // node_modules/hydrogen-web/src/matrix/ssss/passphrase.js
@@ -10360,12 +10599,8 @@ var DehydratedDevice = class {
   }
 };
 
-// node_modules/hydrogen-web/src/utils/Lock.js
+// node_modules/hydrogen-web/src/utils/Lock.ts
 var Lock = class {
-  constructor() {
-    this._promise = null;
-    this._resolve = null;
-  }
   tryTake() {
     if (!this._promise) {
       this._promise = new Promise((resolve) => {
@@ -10385,9 +10620,9 @@ var Lock = class {
   }
   release() {
     if (this._resolve) {
-      this._promise = null;
+      this._promise = void 0;
       const resolve = this._resolve;
-      this._resolve = null;
+      this._resolve = void 0;
       resolve();
     }
   }
@@ -10981,10 +11216,10 @@ var DecryptionChanges2 = class {
   }
 };
 
-// node_modules/hydrogen-web/src/utils/mergeMap.js
-function mergeMap(src2, dst) {
-  if (src2) {
-    for (const [key, value] of src2.entries()) {
+// node_modules/hydrogen-web/src/utils/mergeMap.ts
+function mergeMap(src, dst) {
+  if (src) {
+    for (const [key, value] of src.entries()) {
       dst.set(key, value);
     }
   }
@@ -12192,7 +12427,7 @@ var BatchDecryptionResult = class {
   }
 };
 
-// node_modules/hydrogen-web/src/utils/LockMap.js
+// node_modules/hydrogen-web/src/utils/LockMap.ts
 var LockMap = class {
   constructor() {
     this._map = /* @__PURE__ */ new Map();
@@ -12239,18 +12474,18 @@ var SecretStorage = class {
     }
   }
   async _decryptAESSecret(type, encryptedData) {
-    const { base64, utf8 } = this._platform.encoding;
+    const { base64: base643, utf8 } = this._platform.encoding;
     const hkdfKey = await this._platform.crypto.derive.hkdf(this._key.binaryKey, new Uint8Array(8).buffer, utf8.encode(type), "SHA-256", 512);
     const aesKey = hkdfKey.slice(0, 32);
     const hmacKey = hkdfKey.slice(32);
-    const ciphertextBytes = base64.decode(encryptedData.ciphertext);
-    const isVerified = await this._platform.crypto.hmac.verify(hmacKey, base64.decode(encryptedData.mac), ciphertextBytes, "SHA-256");
+    const ciphertextBytes = base643.decode(encryptedData.ciphertext);
+    const isVerified = await this._platform.crypto.hmac.verify(hmacKey, base643.decode(encryptedData.mac), ciphertextBytes, "SHA-256");
     if (!isVerified) {
       throw new Error("Bad MAC");
     }
     const plaintextBytes = await this._platform.crypto.aes.decryptCTR({
       key: aesKey,
-      iv: base64.decode(encryptedData.iv),
+      iv: base643.decode(encryptedData.iv),
       data: ciphertextBytes
     });
     return utf8.decode(plaintextBytes);
@@ -13717,7 +13952,7 @@ function stringifyPath(path) {
   return urlPath;
 }
 
-// node_modules/hydrogen-web/src/utils/timeout.js
+// node_modules/hydrogen-web/src/utils/timeout.ts
 function abortOnTimeout(createTimeout, timeoutAmount, requestResult, responsePromise) {
   const timeout = createTimeout(timeoutAmount);
   let timedOut = false;
@@ -14003,76 +14238,19 @@ var UTF8 = class {
     }
     return this._encoder.encode(str);
   }
-  decode(buffer2) {
+  decode(buffer) {
     if (!this._decoder) {
       this._decoder = new TextDecoder();
     }
-    return this._decoder.decode(buffer2);
+    return this._decoder.decode(buffer);
   }
 };
 
-// node_modules/hydrogen-web/lib/base64-arraybuffer/index.js
-function createCommonjsModule(fn, basedir, module) {
-  return module = {
-    path: basedir,
-    exports: {},
-    require: function(path, base2) {
-      return commonjsRequire(path, base2 === void 0 || base2 === null ? module.path : base2);
-    }
-  }, fn(module, module.exports), module.exports;
-}
-function commonjsRequire() {
-  throw new Error("Dynamic requires are not currently supported by @rollup/plugin-commonjs");
-}
-var base64Arraybuffer = createCommonjsModule(function(module, exports) {
-  (function() {
-    var chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
-    var lookup = new Uint8Array(256);
-    for (var i = 0; i < chars.length; i++) {
-      lookup[chars.charCodeAt(i)] = i;
-    }
-    exports.encode = function(arraybuffer) {
-      var bytes = new Uint8Array(arraybuffer), i2, len = bytes.length, base64 = "";
-      for (i2 = 0; i2 < len; i2 += 3) {
-        base64 += chars[bytes[i2] >> 2];
-        base64 += chars[(bytes[i2] & 3) << 4 | bytes[i2 + 1] >> 4];
-        base64 += chars[(bytes[i2 + 1] & 15) << 2 | bytes[i2 + 2] >> 6];
-        base64 += chars[bytes[i2 + 2] & 63];
-      }
-      if (len % 3 === 2) {
-        base64 = base64.substring(0, base64.length - 1) + "=";
-      } else if (len % 3 === 1) {
-        base64 = base64.substring(0, base64.length - 2) + "==";
-      }
-      return base64;
-    };
-    exports.decode = function(base64) {
-      var bufferLength = base64.length * 0.75, len = base64.length, i2, p = 0, encoded1, encoded2, encoded3, encoded4;
-      if (base64[base64.length - 1] === "=") {
-        bufferLength--;
-        if (base64[base64.length - 2] === "=") {
-          bufferLength--;
-        }
-      }
-      var arraybuffer = new ArrayBuffer(bufferLength), bytes = new Uint8Array(arraybuffer);
-      for (i2 = 0; i2 < len; i2 += 4) {
-        encoded1 = lookup[base64.charCodeAt(i2)];
-        encoded2 = lookup[base64.charCodeAt(i2 + 1)];
-        encoded3 = lookup[base64.charCodeAt(i2 + 2)];
-        encoded4 = lookup[base64.charCodeAt(i2 + 3)];
-        bytes[p++] = encoded1 << 2 | encoded2 >> 4;
-        bytes[p++] = (encoded2 & 15) << 4 | encoded3 >> 2;
-        bytes[p++] = (encoded3 & 3) << 6 | encoded4 & 63;
-      }
-      return arraybuffer;
-    };
-  })();
-});
-
 // node_modules/hydrogen-web/src/platform/web/utils/Base64.js
+var import_base64_arraybuffer = __toModule(require_base64_arraybuffer());
 var Base64 = class {
-  encodeUnpadded(buffer2) {
-    const str = base64Arraybuffer.encode(buffer2);
+  encodeUnpadded(buffer) {
+    const str = import_base64_arraybuffer.default.encode(buffer);
     const paddingIdx = str.indexOf("=");
     if (paddingIdx !== -1) {
       return str.substr(0, paddingIdx);
@@ -14080,170 +14258,22 @@ var Base64 = class {
       return str;
     }
   }
-  encode(buffer2) {
-    return base64Arraybuffer.encode(buffer2);
+  encode(buffer) {
+    return import_base64_arraybuffer.default.encode(buffer);
   }
   decode(str) {
-    return base64Arraybuffer.decode(str);
+    return import_base64_arraybuffer.default.decode(str);
   }
 };
-
-// node_modules/hydrogen-web/lib/bs58/index.js
-var buffer = class Buffer2 {
-  static isBuffer(array) {
-    return array instanceof Uint8Array;
-  }
-  static from(arrayBuffer) {
-    return arrayBuffer;
-  }
-  static allocUnsafe(size) {
-    return Buffer2.alloc(size);
-  }
-  static alloc(size) {
-    return new Uint8Array(size);
-  }
-};
-var require$$0$1 = buffer;
-var Buffer3 = require$$0$1;
-var safeBuffer = {
-  Buffer: Buffer3
-};
-var require$$0 = safeBuffer;
-var _Buffer = require$$0.Buffer;
-function base(ALPHABET2) {
-  if (ALPHABET2.length >= 255) {
-    throw new TypeError("Alphabet too long");
-  }
-  var BASE_MAP = new Uint8Array(256);
-  for (var j = 0; j < BASE_MAP.length; j++) {
-    BASE_MAP[j] = 255;
-  }
-  for (var i = 0; i < ALPHABET2.length; i++) {
-    var x = ALPHABET2.charAt(i);
-    var xc = x.charCodeAt(0);
-    if (BASE_MAP[xc] !== 255) {
-      throw new TypeError(x + " is ambiguous");
-    }
-    BASE_MAP[xc] = i;
-  }
-  var BASE = ALPHABET2.length;
-  var LEADER = ALPHABET2.charAt(0);
-  var FACTOR = Math.log(BASE) / Math.log(256);
-  var iFACTOR = Math.log(256) / Math.log(BASE);
-  function encode(source) {
-    if (Array.isArray(source) || source instanceof Uint8Array) {
-      source = _Buffer.from(source);
-    }
-    if (!_Buffer.isBuffer(source)) {
-      throw new TypeError("Expected Buffer");
-    }
-    if (source.length === 0) {
-      return "";
-    }
-    var zeroes = 0;
-    var length = 0;
-    var pbegin = 0;
-    var pend = source.length;
-    while (pbegin !== pend && source[pbegin] === 0) {
-      pbegin++;
-      zeroes++;
-    }
-    var size = (pend - pbegin) * iFACTOR + 1 >>> 0;
-    var b58 = new Uint8Array(size);
-    while (pbegin !== pend) {
-      var carry = source[pbegin];
-      var i2 = 0;
-      for (var it1 = size - 1; (carry !== 0 || i2 < length) && it1 !== -1; it1--, i2++) {
-        carry += 256 * b58[it1] >>> 0;
-        b58[it1] = carry % BASE >>> 0;
-        carry = carry / BASE >>> 0;
-      }
-      if (carry !== 0) {
-        throw new Error("Non-zero carry");
-      }
-      length = i2;
-      pbegin++;
-    }
-    var it2 = size - length;
-    while (it2 !== size && b58[it2] === 0) {
-      it2++;
-    }
-    var str = LEADER.repeat(zeroes);
-    for (; it2 < size; ++it2) {
-      str += ALPHABET2.charAt(b58[it2]);
-    }
-    return str;
-  }
-  function decodeUnsafe(source) {
-    if (typeof source !== "string") {
-      throw new TypeError("Expected String");
-    }
-    if (source.length === 0) {
-      return _Buffer.alloc(0);
-    }
-    var psz = 0;
-    var zeroes = 0;
-    var length = 0;
-    while (source[psz] === LEADER) {
-      zeroes++;
-      psz++;
-    }
-    var size = (source.length - psz) * FACTOR + 1 >>> 0;
-    var b256 = new Uint8Array(size);
-    while (source[psz]) {
-      var carry = BASE_MAP[source.charCodeAt(psz)];
-      if (carry === 255) {
-        return;
-      }
-      var i2 = 0;
-      for (var it3 = size - 1; (carry !== 0 || i2 < length) && it3 !== -1; it3--, i2++) {
-        carry += BASE * b256[it3] >>> 0;
-        b256[it3] = carry % 256 >>> 0;
-        carry = carry / 256 >>> 0;
-      }
-      if (carry !== 0) {
-        throw new Error("Non-zero carry");
-      }
-      length = i2;
-      psz++;
-    }
-    var it4 = size - length;
-    while (it4 !== size && b256[it4] === 0) {
-      it4++;
-    }
-    var vch = _Buffer.allocUnsafe(zeroes + (size - it4));
-    vch.fill(0, 0, zeroes);
-    var j2 = zeroes;
-    while (it4 !== size) {
-      vch[j2++] = b256[it4++];
-    }
-    return vch;
-  }
-  function decode(string) {
-    var buffer2 = decodeUnsafe(string);
-    if (buffer2) {
-      return buffer2;
-    }
-    throw new Error("Non-base" + BASE + " character");
-  }
-  return {
-    encode,
-    decodeUnsafe,
-    decode
-  };
-}
-var src = base;
-var basex = src;
-var ALPHABET = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz";
-var bs58 = basex(ALPHABET);
 
 // node_modules/hydrogen-web/src/platform/web/utils/Base58.js
+var import_bs58 = __toModule(require_bs58());
 var Base58 = class {
-  encode(buffer2) {
-    return bs58.encode(buffer2);
+  encode(buffer) {
+    return import_bs58.default.encode(buffer);
   }
   decode(str) {
-    return bs58.decode(str);
+    return import_bs58.default.decode(str);
   }
 };
 
@@ -14469,9 +14499,10 @@ var LogItem = class {
 
 // node_modules/hydrogen-web/src/logging/BaseLogger.ts
 var BaseLogger = class {
-  constructor({ platform }) {
+  constructor({ platform, serializedTransformer = (item) => item }) {
     this._openItems = /* @__PURE__ */ new Set();
     this._platform = platform;
+    this._serializedTransformer = serializedTransformer;
   }
   log(labelOrValues, logLevel = LogLevel.Info) {
     const item = new LogItem(labelOrValues, logLevel, this);
@@ -14642,9 +14673,12 @@ var IDBLogger = class extends BaseLogger {
   }
   _persistItem(logItem, filter, forced) {
     const serializedItem = logItem.serialize(filter, void 0, forced);
-    this._queuedItems.push({
-      json: JSON.stringify(serializedItem)
-    });
+    if (serializedItem) {
+      const transformedSerializedItem = this._serializedTransformer(serializedItem);
+      this._queuedItems.push({
+        json: JSON.stringify(transformedSerializedItem)
+      });
+    }
   }
   _persistQueuedItems(items) {
     try {
@@ -14711,8 +14745,8 @@ var IDBLogExport = class {
       items: this._items.map((i) => JSON.parse(i.json))
     };
     const json = JSON.stringify(log);
-    const buffer2 = this._platform.encoding.utf8.encode(json);
-    const blob = this._platform.createBlob(buffer2, "application/json");
+    const buffer = this._platform.encoding.utf8.encode(json);
+    const blob = this._platform.createBlob(buffer, "application/json");
     return blob;
   }
 };
@@ -17503,11 +17537,11 @@ var SessionView = class extends TemplateView {
 
 // node_modules/hydrogen-web/src/platform/web/ui/login/common.js
 function hydrogenGithubLink(t) {
-  if (window.HYDROGEN_VERSION) {
+  if (HYDROGEN_VERSION) {
     return t.a({
       target: "_blank",
-      href: `https://github.com/vector-im/hydrogen-web/releases/tag/v${window.HYDROGEN_VERSION}`
-    }, `Hydrogen v${window.HYDROGEN_VERSION} (${window.HYDROGEN_GLOBAL_HASH}) on Github`);
+      href: `https://github.com/vector-im/hydrogen-web/releases/tag/v${HYDROGEN_VERSION}`
+    }, `Hydrogen v${HYDROGEN_VERSION} (${window.HYDROGEN_GLOBAL_HASH}) on Github`);
   } else {
     return t.a({ target: "_blank", href: "https://github.com/vector-im/hydrogen-web" }, "Hydrogen on Github");
   }
@@ -17955,7 +17989,7 @@ var ServiceWorkerHandler = class {
     this._registration.update();
   }
   get version() {
-    return window.HYDROGEN_VERSION;
+    return HYDROGEN_VERSION;
   }
   get buildHash() {
     return window.HYDROGEN_GLOBAL_HASH;
@@ -18121,6 +18155,7 @@ var OnlineStatus = class extends BaseObservableValue {
 };
 
 // node_modules/hydrogen-web/src/platform/web/dom/Crypto.js
+var import_base64_arraybuffer2 = __toModule(require_base64_arraybuffer());
 function subtleCryptoResult(promiseOrOp, method) {
   if (promiseOrOp instanceof Promise) {
     return promiseOrOp;
@@ -18150,8 +18185,8 @@ var HMACCrypto = class {
       hash: { name: hashName(hash) }
     };
     const hmacKey = await subtleCryptoResult(this._subtleCrypto.importKey("raw", key, opts, false, ["sign"]), "importKey");
-    const buffer2 = await subtleCryptoResult(this._subtleCrypto.sign(opts, hmacKey, data), "sign");
-    return new Uint8Array(buffer2);
+    const buffer = await subtleCryptoResult(this._subtleCrypto.sign(opts, hmacKey, data), "sign");
+    return new Uint8Array(buffer);
   }
 };
 var DeriveCrypto = class {
@@ -18262,10 +18297,10 @@ function jwkKeyToRaw(jwkKey) {
   }
   const base64UrlKey = jwkKey.k;
   const base64Key = base64UrlKey.replace(/-/g, "+").replace(/_/g, "/");
-  return base64Arraybuffer.decode(base64Key);
+  return import_base64_arraybuffer2.default.decode(base64Key);
 }
-function encodeUnpaddedBase64(buffer2) {
-  const str = base64Arraybuffer.encode(buffer2);
+function encodeUnpaddedBase64(buffer) {
+  const str = import_base64_arraybuffer2.default.encode(buffer);
   const paddingIdx = str.indexOf("=");
   if (paddingIdx !== -1) {
     return str.substr(0, paddingIdx);
@@ -18273,8 +18308,8 @@ function encodeUnpaddedBase64(buffer2) {
     return str;
   }
 }
-function encodeUrlBase64(buffer2) {
-  const unpadded = encodeUnpaddedBase64(buffer2);
+function encodeUrlBase64(buffer) {
+  const unpadded = encodeUnpaddedBase64(buffer);
   return unpadded.replace(/\+/g, "-").replace(/\//g, "_");
 }
 function rawKeyToJwk(key) {
@@ -18563,17 +18598,17 @@ var ALLOWED_BLOB_MIMETYPES = {
 };
 var DEFAULT_MIMETYPE = "application/octet-stream";
 var BlobHandle = class {
-  constructor(blob, buffer2 = null) {
+  constructor(blob, buffer = null) {
     this._blob = blob;
-    this._buffer = buffer2;
+    this._buffer = buffer;
     this._url = null;
   }
-  static fromBuffer(buffer2, mimetype) {
+  static fromBuffer(buffer, mimetype) {
     mimetype = mimetype ? mimetype.split(";")[0].trim() : "";
     if (!ALLOWED_BLOB_MIMETYPES[mimetype]) {
       mimetype = DEFAULT_MIMETYPE;
     }
-    return new BlobHandle(new Blob([buffer2], { type: mimetype }), buffer2);
+    return new BlobHandle(new Blob([buffer], { type: mimetype }), buffer);
   }
   static fromBlob(blob) {
     return new BlobHandle(blob);
@@ -18734,10 +18769,10 @@ async function downloadInIframe(container2, iframeSrc, blobHandle, filename, isI
     detach();
   }
   if (isIOS) {
-    const buffer2 = await blobHandle.readAsBuffer();
+    const buffer = await blobHandle.readAsBuffer();
     iframe.contentWindow.postMessage({
       type: "downloadBuffer",
-      buffer: buffer2,
+      buffer,
       mimeType: blobHandle.mimeType,
       filename
     }, "*");
@@ -18792,10 +18827,10 @@ function parseHTML(html) {
 }
 
 // node_modules/hydrogen-web/src/platform/web/Platform.js
-function addScript(src2) {
+function addScript(src) {
   return new Promise(function(resolve, reject) {
     var s = document.createElement("script");
-    s.setAttribute("src", src2);
+    s.setAttribute("src", src);
     s.onload = resolve;
     s.onerror = reject;
     document.body.appendChild(s);
@@ -18867,11 +18902,7 @@ var Platform = class {
     this.clock = new Clock2();
     this.encoding = new Encoding();
     this.random = Math.random;
-    if (options?.development) {
-      this.logger = new ConsoleLogger({ platform: this });
-    } else {
-      this.logger = new IDBLogger({ name: "hydrogen_logs", platform: this });
-    }
+    this._createLogger(options?.development);
     this.history = new History();
     this.onlineStatus = new OnlineStatus();
     this._serviceWorkerHandler = null;
@@ -18894,6 +18925,19 @@ var Platform = class {
     const isIOS = /iPad|iPhone|iPod/.test(navigator.platform) || navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1 && !window.MSStream;
     this.isIOS = isIOS;
     this._disposables = new Disposables();
+  }
+  _createLogger(isDevelopment) {
+    const transformer = (item) => {
+      if (item.e?.stack) {
+        item.e.stack = item.e.stack.replace(/(?<=\/\?loginToken=).+/, "<snip>");
+      }
+      return item;
+    };
+    if (isDevelopment) {
+      this.logger = new ConsoleLogger({ platform: this });
+    } else {
+      this.logger = new IDBLogger({ name: "hydrogen_logs", platform: this, serializedTransformer: transformer });
+    }
   }
   get updateService() {
     return this._serviceWorkerHandler;
@@ -18929,8 +18973,8 @@ var Platform = class {
   setNavigation(navigation) {
     this._serviceWorkerHandler?.setNavigation(navigation);
   }
-  createBlob(buffer2, mimetype) {
-    return BlobHandle.fromBuffer(buffer2, mimetype);
+  createBlob(buffer, mimetype) {
+    return BlobHandle.fromBuffer(buffer, mimetype);
   }
   saveFileAs(blobHandle, filename) {
     if (navigator.msSaveBlob) {
@@ -18982,7 +19026,7 @@ var Platform = class {
     return window.devicePixelRatio || 1;
   }
   get version() {
-    return window.HYDROGEN_VERSION;
+    return HYDROGEN_VERSION;
   }
   dispose() {
     this._disposables.dispose();
@@ -20337,8 +20381,8 @@ var FormatPart = class {
   }
 };
 var ImagePart = class {
-  constructor(src2, width, height, alt, title) {
-    this.src = src2;
+  constructor(src, width, height, alt, title) {
+    this.src = src;
     this.width = width;
     this.height = height;
     this.alt = alt;
@@ -20426,7 +20470,6 @@ var BaseTextTile = class extends BaseMessageTile {
 };
 
 // node_modules/hydrogen-web/src/domain/session/room/timeline/deserialize.js
-import parse2 from "../../../node_modules/hydrogen-web/lib/node-html-parser/index.js";
 var basicInline = ["EM", "STRONG", "CODE", "DEL", "SPAN"];
 var basicBlock = ["DIV", "BLOCKQUOTE"];
 var safeSchemas = ["https", "http", "ftp", "mailto", "magnet"].map((name) => `${name}://`);
@@ -20501,8 +20544,8 @@ var Deserializer = class {
   }
   parseImage(node) {
     const result = this.result;
-    const src2 = result.getAttributeValue(node, "src") || "";
-    const url = this.mediaRepository.mxcUrl(src2);
+    const src = result.getAttributeValue(node, "src") || "";
+    const url = this.mediaRepository.mxcUrl(src);
     if (!url) {
       return null;
     }
@@ -20933,12 +20976,12 @@ var VideoTile = class extends BaseMediaTile {
   }
 };
 
-// node_modules/hydrogen-web/src/utils/formatSize.js
+// node_modules/hydrogen-web/src/utils/formatSize.ts
 function formatSize(size, decimals = 2) {
   if (Number.isSafeInteger(size)) {
-    const base2 = Math.min(3, Math.floor(Math.log(size) / Math.log(1024)));
-    const formattedSize = Math.round(size / Math.pow(1024, base2)).toFixed(decimals);
-    switch (base2) {
+    const base = Math.min(3, Math.floor(Math.log(size) / Math.log(1024)));
+    const formattedSize = Math.round(size / Math.pow(1024, base)).toFixed(decimals);
+    switch (base) {
       case 0:
         return `${formattedSize} bytes`;
       case 1:
@@ -20949,6 +20992,7 @@ function formatSize(size, decimals = 2) {
         return `${formattedSize} GB`;
     }
   }
+  return "";
 }
 
 // node_modules/hydrogen-web/src/domain/session/room/timeline/tiles/FileTile.js
@@ -23642,7 +23686,7 @@ export {
   createNavigation,
   createRouter
 };
-/*! @license DOMPurify 2.3.3 | (c) Cure53 and other contributors | Released under the Apache license 2.0 and Mozilla Public License 2.0 | github.com/cure53/DOMPurify/blob/2.3.3/LICENSE */
+/*! @license DOMPurify 2.3.4 | (c) Cure53 and other contributors | Released under the Apache license 2.0 and Mozilla Public License 2.0 | github.com/cure53/DOMPurify/blob/2.3.4/LICENSE */
 /**
  * @license
  * Based off baseSortedIndex function in Lodash <https://lodash.com/>

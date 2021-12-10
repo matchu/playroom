@@ -1,3 +1,5 @@
+import * as fs from "fs";
+import * as path from "path";
 import { build, analyzeMetafile } from "esbuild";
 import svg from "esbuild-plugin-svg";
 
@@ -7,9 +9,20 @@ await buildFilesAndPrintSummary({
   bundle: true,
   format: "esm",
   external: [
-    "./node_modules/hydrogen-web/lib/node-html-parser/index.js",
-    "./node_modules/hydrogen-web/lib/fake-indexeddb/index.js",
+    "node-html-parser",
+    "fake-indexeddb/lib/FDBFactory.js",
+    "fake-indexeddb/lib/FDBKeyRange.js",
   ],
+  define: {
+    DEFINE_VERSION: JSON.stringify(
+      JSON.parse(
+        fs.readFileSync(
+          path.join("node_modules/hydrogen-web/package.json"),
+          "utf8"
+        )
+      ).version
+    ),
+  },
   outfile: "src/scripts/lib/hydrogen-web.js",
 });
 

@@ -18,3 +18,13 @@
 .Timeline_messageAvatar {
   display: none;
 }
+
+/**
+ * Hydrogen's Element theme packages its own font, which I don't actually
+ * want! I'd rather just lean on system fonts, both to reduce bundle size
+ * and reduce brand tie-ins.
+ */
+.playroom-root
+  :is(.hydrogen, .FilterField input, .MessageComposer_input > textarea) {
+  font-family: inherit !important;
+}

@@ -7,9 +7,10 @@
     "but its call site isn't getting tree shaken out so, oh well! Weird!"
   ],
   "dependencies": {
-    "hydrogen-web": "git+https://github.com/vector-im/hydrogen-web.git#semver:^0.2.22"
+    "hydrogen-web": "git+https://github.com/vector-im/hydrogen-web.git#dacdc1aec6cfe01cf473b5cae120a71fd0be5078"
   },
   "devDependencies": {
+    "buffer": "^6.0.3",
     "esbuild": "^0.14.2",
     "esbuild-plugin-svg": "^0.1.0",
     "eslint": "^8.4.0",
