@@ -30,7 +30,8 @@ export default class Playroom {
       await this._matrixClient.loginAsSavedSessionOrGuest();
     } catch (error) {
       console.error("[Playroom] Error logging in", error);
-      this._handleLoginError(error);
+      this.state.chat.status = "login-error";
+      return;
     }
 
     // Then, start loading stream state. We don't wait, we just get started!
@@ -65,8 +66,8 @@ export default class Playroom {
       }
 
       // Otherwise, show a generic error message.
-      this.state.chat.status = "login-error";
       console.error("[Playroom] Error setting up account", error);
+      this.state.chat.status = "login-error";
       return;
     }
 

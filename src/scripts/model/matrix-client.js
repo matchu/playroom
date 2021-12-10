@@ -57,7 +57,7 @@ export default class MatrixClient {
     // First, create an account.
     const guestSessionData = await this._api.post(
       "/_matrix/client/v3/register?kind=guest",
-      {}
+      { body: {} }
     );
 
     // Then, build it into a Matrix session object to use in future requests.
