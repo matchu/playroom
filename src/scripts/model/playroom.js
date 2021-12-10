@@ -80,7 +80,7 @@ export default class Playroom {
     const widgetUrls = await this._matrixClient.getRoomWidgetUrls();
 
     if (widgetUrls.length >= 1) {
-      this.state.stream.status = "ready";
+      this.state.stream.status = "live";
       this.state.stream.videoEmbedUrl = widgetUrls[0];
     } else {
       this.state.stream.status = "idle";

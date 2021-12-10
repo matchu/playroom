@@ -12,7 +12,7 @@
       <section class="stream-panel">
         <iframe
           v-bind:src="stream.videoEmbedUrl"
-          v-if="stream.status === 'ready'"
+          v-if="stream.status === 'live'"
           title="Stream video content"
           frameborder="0"
           allow="clipboard-write; encrypted-media; picture-in-picture"
