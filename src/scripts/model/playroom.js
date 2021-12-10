@@ -72,8 +72,8 @@ export default class Playroom {
       return;
     }
 
-    // If there were no errors, then chat is ready!
-    this.state.chat.status = "ready";
+    // If there were no errors, then we're logged in!
+    this.state.chat.status = "logged-in";
   }
 
   async loadStreamState() {

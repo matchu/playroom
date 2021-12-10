@@ -14,7 +14,7 @@ export default function Hydrogen({ playroom }) {
 
   // Wait for chat to become ready, then load and mount Hydrogen.
   effect(() => {
-    if (playroom.state.chat.status === "ready") {
+    if (playroom.state.chat.status === "logged-in") {
       setTimeout(async () => {
         const hydrogenContainer = document.querySelector(
           ".playroom-root .hydrogen"

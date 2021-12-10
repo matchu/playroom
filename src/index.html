@@ -28,7 +28,7 @@
           <form
             class="display-name-form"
             @submit="displayNameForm.submit"
-            v-if="chat.status === 'ready'"
+            v-if="chat.status === 'logged-in'"
           >
             <label>
               <div>Display name</div>
@@ -62,7 +62,7 @@
           class="chat-loading-message"
           v-if="
             chat.status === 'logging-in' ||
-              (chat.status === 'ready' && hydrogen.status === 'loading')
+              (chat.status === 'logged-in' && hydrogen.status === 'loading')
           "
         >
           <div>Logging in…</div>
