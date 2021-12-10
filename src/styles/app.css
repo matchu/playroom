@@ -20,14 +20,14 @@ a {
 /**
  * The playroom app has two main areas: a video panel, and a chat panel.
  */
-playroom-app {
+.playroom-root {
   display: grid;
   height: 100%;
 }
-stream-panel {
+.stream-panel {
   grid-area: video;
 }
-chat-panel {
+.chat-panel {
   grid-area: chat;
 }
 
@@ -35,7 +35,7 @@ chat-panel {
  * On wide screens, the video and chat areas are a horizontal two-column view.
  */
 @media (min-width: 1025px) {
-  playroom-app {
+  .playroom-root {
     grid-template-areas: "video chat";
     grid-template-columns: 1fr 450px;
   }
@@ -47,7 +47,7 @@ chat-panel {
  * small, it gets a scroll bar.
  */
 @media (max-width: 1024px) {
-  playroom-app {
+  .playroom-root {
     grid-template-areas:
       "video"
       "chat";
@@ -60,7 +60,7 @@ chat-panel {
  * The video panel has a dark background, and centers its contents. It will be
  * covered by the iframe once it loads.
  */
-stream-panel {
+.stream-panel {
   background: #223;
   display: flex;
   flex-direction: column;
@@ -71,7 +71,7 @@ stream-panel {
 /**
  * The embedded iframe takes up the whole area.
  */
-stream-panel iframe {
+.stream-panel iframe {
   width: 100%;
   height: 100%;
 }
@@ -79,28 +79,28 @@ stream-panel iframe {
 /**
  * The stream idle indicator appears when there's no stream.
  */
-stream-idle-indicator {
+.stream-idle-indicator {
   color: white;
   text-align: center;
 }
 
 /**
- * chat-panel is the main chat container. It uses a single grid area, to size
+ * .chat-panel is the main chat container. It uses a single grid area, to size
  * its content to its own full size.
  */
-chat-panel {
+.chat-panel {
   display: grid;
   grid-template-areas: "the-single-area";
   min-height: 100%;
 }
 
 /**
- * All three content types take up the whole chat-panel, and are column flex
+ * All three content types take up the whole .chat-panel, and are column flex
  * containers.
  */
-chat-main,
-chat-loading-message,
-chat-error-message {
+.chat-main,
+.chat-loading-message,
+.chat-error-message {
   grid-area: the-single-area;
   display: flex;
   flex-direction: column;
@@ -109,8 +109,8 @@ chat-error-message {
 /**
  * The loading and error messages center their content.
  */
-chat-loading-message,
-chat-error-message {
+.chat-loading-message,
+.chat-error-message {
   justify-content: center;
   text-align: center;
 }
@@ -118,21 +118,21 @@ chat-error-message {
 /**
  * Chat loading messages have big typographical styles!
  */
-chat-loading-message {
+.chat-loading-message {
   font-size: 1.5em;
 }
 
 /**
  * Chat error messages have medium typographical styles.
  */
-chat-error-message {
+.chat-error-message {
   font-size: 1.2em;
 }
 
 /**
  * The chat header sits above the main chat area, with settings etc.
  */
-chat-main header {
+.chat-main header {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -142,14 +142,14 @@ chat-main header {
 /**
  * The chat title should be large, but not as large as most h1s.
  */
-chat-main header h1 {
+.chat-main header h1 {
   font-size: 1.4em;
 }
 
 /**
  * The "Display name" form flows horizontally.
  */
-display-name-form form {
+.display-name-form {
   display: flex;
   gap: 0.25em;
   align-items: flex-end;
@@ -158,7 +158,7 @@ display-name-form form {
 /**
  * Add some space between the "Display name" label and the input!
  */
-display-name-form label {
+.display-name-form label {
   display: flex;
   flex-direction: column;
   gap: 0.25em;
@@ -170,7 +170,10 @@ display-name-form label {
  *
  * That way, we can show loading UI while the JS is loading, but hide it once
  * the page starts up.
+ *
+ * NOTE: This code depends on the templating engine to remove `v-scope` once
+ *       it loads.
  */
-playroom-app[v-scope] :is([v-if], [v-show]):not([v-show-while-page-loading]) {
+.playroom-root[v-scope] :is([v-if], [v-show]):not([v-show-while-page-loading]) {
   display: none;
 }

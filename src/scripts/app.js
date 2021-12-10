@@ -30,7 +30,7 @@ function mountPlayroomApp({ container, roomId }) {
 }
 
 document.addEventListener("DOMContentLoaded", async () => {
-  const container = document.querySelector("chat-panel");
+  const container = document.querySelector(".chat-panel");
   if (container == null) {
     alert("Error: Can't find the chat-panel element to mount the app into.");
     return;

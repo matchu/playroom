@@ -8,8 +8,8 @@
     <script type="module" src="scripts/app.js"></script>
   </head>
   <body>
-    <playroom-app v-scope @mounted="startPlayroom">
-      <stream-panel>
+    <main class="playroom-root" v-scope @mounted="startPlayroom">
+      <section class="stream-panel">
         <iframe
           v-bind:src="stream.videoEmbedUrl"
           v-if="stream.status === 'ready'"
@@ -18,27 +18,32 @@
           allow="clipboard-write; encrypted-media; picture-in-picture"
           allowfullscreen
         ></iframe>
-        <stream-idle-indicator v-if="stream.status === 'idle'">
+        <div class="stream-idle-indicator" v-if="stream.status === 'idle'">
           No stream right now! Hope you're doing well today! 💖
-        </stream-idle-indicator>
-      </stream-panel>
-      <chat-panel>
-        <chat-loading-message
+        </div>
+      </section>
+      <section class="chat-panel">
+        <div
+          class="chat-loading-message"
           v-if="chat.status === 'loading'"
           v-show-while-page-loading
         >
           <div>Loading…</div>
-        </chat-loading-message>
-        <chat-loading-message
+        </div>
+        <div
+          class="chat-loading-message"
           v-if="chat.status === 'logging-in' || (chat.status === 'ready' && !hydrogenLoaded)"
         >
           <div>Logging in…</div>
-        </chat-loading-message>
-        <chat-error-message v-if="chat.status === 'login-error'">
+        </div>
+        <div class="chat-error-message" v-if="chat.status === 'login-error'">
           <p>We're having trouble logging you into chat, sorry 😖</p>
           <p>You can come find me and ask me for help if it keeps happening!</p>
-        </chat-error-message>
-        <chat-error-message v-if="chat.status === 'must-agree-to-terms'">
+        </div>
+        <div
+          class="chat-error-message"
+          v-if="chat.status === 'must-agree-to-terms'"
+        >
           <p>Hi welcome!! Excited to have you!!</p>
           <p>
             To use chat, you'll need to read
@@ -48,39 +53,41 @@
             first, and click Agree. Come back here when you're done!
           </p>
           <p>You can also just hang out and watch if you want 😊</p>
-        </chat-error-message>
+        </div>
         <!--
           chat-main uses v-show instead of v-if, so that it's always mounted in
           the page. That's because we start loading Hydrogen onto the page, and
           then wait for it to finish before we become "ready" and show it!
         -->
-        <chat-main v-if="chat.status === 'ready'" v-show="hydrogenLoaded">
+        <div
+          class="chat-main"
+          v-if="chat.status === 'ready'"
+          v-show="hydrogenLoaded"
+        >
           <header>
             <h1>Chat</h1>
-            <display-name-form>
-              <form @submit="displayNameForm.submit">
-                <label>
-                  <div>Display name</div>
-                  <input
-                    type="text"
-                    v-model="displayNameForm.displayName"
-                    v-bind:disabled="displayNameForm.isDisabled"
-                    required
-                    ref="displayNameInput"
-                  />
-                </label>
-                <button
-                  type="submit"
+            <form class="display-name-form" @submit="displayNameForm.submit">
+              <label>
+                <div>Display name</div>
+                <input
+                  type="text"
+                  v-model="displayNameForm.displayName"
                   v-bind:disabled="displayNameForm.isDisabled"
-                >
-                  Save
-                </button>
-              </form>
-            </display-name-form>
+                  required
+                  ref="displayNameInput"
+                />
+              </label>
+              <button
+                type="submit"
+                v-bind:disabled="displayNameForm.isDisabled"
+              >
+                Save
+              </button>
+            </form>
           </header>
           <div class="hydrogen" ref="hydrogen" @mounted="loadHydrogen"></div>
-        </chat-main>
-      </chat-panel>
-    </playroom-app>
+        </div>
+      </section>
+    </main>
   </body>
 </html>
