@@ -2,12 +2,9 @@ import { reactive } from "../lib/petite-vue";
 import MatrixClient from "./matrix-client";
 
 export default class Playroom {
-  constructor({ roomId, appName = "Playroom" }) {
-    this.appName = appName;
-    this.roomId = roomId;
-    this._matrixClient = new MatrixClient({
-      roomId,
-    });
+  constructor({ settings }) {
+    this.settings = settings;
+    this._matrixClient = new MatrixClient({ settings });
 
     const playroom = this;
     this.state = reactive({

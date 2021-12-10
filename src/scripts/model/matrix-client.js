@@ -2,10 +2,10 @@ import { reactive } from "../lib/petite-vue";
 import MatrixAPI from "./matrix-api";
 
 export default class MatrixClient {
-  constructor({ roomId }) {
-    this._roomId = roomId;
+  constructor({ settings }) {
+    this.settings = settings;
     this._api = new MatrixAPI({
-      homeserver: roomId.split(":")[1],
+      homeserver: this.settings.matrix.roomId.split(":")[1],
     });
     this.state = reactive({
       session: null,
@@ -57,11 +57,7 @@ export default class MatrixClient {
     // First, create an account.
     const guestSessionData = await this._api.post(
       "/_matrix/client/v3/register?kind=guest",
-      {
-        body: {
-          initial_device_display_name: this.appName,
-        },
-      }
+      {}
     );
 
     // Then, build it into a Matrix session object to use in future requests.
@@ -91,10 +87,10 @@ export default class MatrixClient {
   }
 
   async _ensureJoinedRoom() {
+    const { roomId } = this.settings.matrix;
     const { accessToken } = this.state.session;
-
     await this._api.post(
-      `/_matrix/client/v3/join/${encodeURIComponent(this._roomId)}`,
+      `/_matrix/client/v3/join/${encodeURIComponent(roomId)}`,
       { accessToken }
     );
   }
@@ -158,9 +154,10 @@ export default class MatrixClient {
   }
 
   async getRoomState() {
+    const { roomId } = this.settings.matrix;
     const { accessToken, userId } = this.state.session;
     const roomEvents = await this._api.get(
-      `/_matrix/client/v3/rooms/${encodeURIComponent(this._roomId)}/state`,
+      `/_matrix/client/v3/rooms/${encodeURIComponent(roomId)}/state`,
       { accessToken }
     );
 

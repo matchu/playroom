@@ -27,7 +27,9 @@ export default function Hydrogen({ playroom }) {
         );
 
         // …then load and mount the view.
-        const view = await hydrogenBridge.createRoomView(playroom.roomId);
+        const view = await hydrogenBridge.createRoomView(
+          playroom.settings.matrix.roomId
+        );
         hydrogenContainer.appendChild(view.mount());
         hydrogen.status = "ready";
       }, 0);
