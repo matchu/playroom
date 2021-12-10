@@ -14,7 +14,10 @@
   "devDependencies": {
     "eslint": "^8.4.0"
   },
-  "source": "src/index.html",
+  "source": [
+    "src/index.html",
+    "src/admin/index.html"
+  ],
   "scripts": {
     "start": "parcel",
     "build": "parcel build",

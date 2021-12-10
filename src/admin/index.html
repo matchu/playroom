@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Playroom</title>
+    <meta name="playroom:room-id" content="!sZgNHUkZHBlGSIUbrs:matrix.org" />
+    <link rel="stylesheet" href="../styles/admin.css" />
+  </head>
+  <body>
+    <section class="login-form">
+      <h1>Playroom Admin</h1>
+      <form>
+        <div class="fields">
+          <label for="username">Username</label>
+          <input type="text" name="username" autofocus />
+          <label for="password">Password</label>
+          <input type="password" name="password" />
+          <label for="homeserver">Matrix server</label>
+          <input type="text" name="homeserver" value="matrix.org" />
+        </div>
+        <button type="submit">Log in</button>
+      </form>
+    </section>
+    <section class="login-warning">
+      <p>
+        Warning: You should <em>never</em> type your Matrix password into
+        someone else's website. Please only use this login form if you are the
+        site admin.
+      </p>
+      <p>
+        Moderators should join the room through a more standard Matrix client,
+        like <a href="https://element.io/">Element</a>, to protect their account
+        and gain access to better mod tools.
+      </p>
+    </section>
+  </body>
+</html>
