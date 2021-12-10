@@ -1,5 +1,5 @@
-@import url("hydrogen-web/src/platform/web/ui/css/main.css");
-@import url("hydrogen-web/src/platform/web/ui/css/themes/element/theme.css");
+@import url("lib/hydrogen-web/main.css");
+@import url("lib/hydrogen-web/themes/element/theme.css");
 
 .hydrogen {
   display: flex;
