@@ -157,30 +157,37 @@ export default class MatrixClient {
     this.state.displayName = newDisplayName;
   }
 
-  async getRoomWidgetUrls() {
-    // Find the first active widget, and get the embed URL from it.
-    //
+  async getRoomState() {
+    const { accessToken, userId } = this.state.session;
+    const roomEvents = await this._api.get(
+      `/_matrix/client/v3/rooms/${encodeURIComponent(this._roomId)}/state`,
+      { accessToken }
+    );
+
+    const powerLevelsEvent = roomEvents.filter(
+      (e) => e.type === "m.room.power_levels"
+    )[0];
+    const powerLevelToManageWidgets =
+      powerLevelsEvent?.content?.events?.["im.vector.modular.widgets"] || 0;
+    const currentUserPowerLevel =
+      powerLevelsEvent?.content?.users?.[userId] || 0;
+
     // NOTE: I'm basing my widget stuff on the widgets API RFC that seems to be
     // what Element and Synapse are using-ish. The main difference seems to be
     // that the widget type is still proprietary instead of `m.widget`. I'm not
     // gonna add `m.widget` support until it gets into the actual spec!
     //
     // https://docs.google.com/document/d/1uPF7XWY_dXTKVKV7jZQ2KmsI19wn9-kFRgQ1tFQP7wQ/edit#heading=h.ll7aaslz33ov
-    const { accessToken } = this.state.session;
-    const roomEvents = await this._api.get(
-      `/_matrix/client/v3/rooms/${encodeURIComponent(this._roomId)}/state`,
-      { accessToken }
-    );
     const widgetEvents = roomEvents.filter(
       (event) => event.type === "im.vector.modular.widgets"
     );
-
-    // Widgets that were removed will still have events, but no content.
     const widgetUrls = widgetEvents
       .map((event) => event.content?.url)
+      // Widgets that were removed will still have events, but no content.
+      // Ignore them.
       .filter((url) => url != null && isValidUrl(url));
 
-    return widgetUrls;
+    return { powerLevelToManageWidgets, currentUserPowerLevel, widgetUrls };
   }
 }
 

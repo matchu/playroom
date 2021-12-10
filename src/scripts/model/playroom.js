@@ -20,6 +20,7 @@ export default class Playroom {
       stream: reactive({
         status: "loading",
         videoEmbedUrl: null,
+        canManage: false,
       }),
     });
   }
@@ -77,9 +78,30 @@ export default class Playroom {
   }
 
   async loadStreamState() {
-    const widgetUrls = await this._matrixClient.getRoomWidgetUrls();
+    const { powerLevelToManageWidgets, currentUserPowerLevel, widgetUrls } =
+      await this._matrixClient.getRoomState();
 
-    if (widgetUrls.length >= 1) {
+    const widgetPowerLevelIsSafe = powerLevelToManageWidgets > 0;
+    if (!widgetPowerLevelIsSafe && !this._hasSentPowerLevelWarning) {
+      alert(
+        `WARNING: Your Matrix room is currently configured to let *anybody* ` +
+          `add and edit widgets.\n\nPlease fix this by setting the "Modify ` +
+          `widgets" setting (or "im.vector.modular.widgets" setting) to ` +
+          `require moderator access.\n\nTo prevent a stream hijack, we've ` +
+          `disabled your stream until this is resolved. Sorry for the ` +
+          `trouble, hope this makes sense! 💖 —The Playroom Devs`
+      );
+      this._hasSentPowerLevelWarning = true;
+    }
+
+    const currentUserCanManageWidgets =
+      currentUserPowerLevel >= powerLevelToManageWidgets;
+    if (currentUserCanManageWidgets) {
+      this.state.stream.canManage = true;
+    }
+
+    // We use the URL of the first active widget in the room as our stream!
+    if (widgetPowerLevelIsSafe && widgetUrls.length >= 1) {
       this.state.stream.status = "live";
       this.state.stream.videoEmbedUrl = widgetUrls[0];
     } else {

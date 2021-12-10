@@ -20,6 +20,7 @@
         ></iframe>
         <div class="stream-idle-indicator" v-if="stream.status === 'idle'">
           No stream right now! Hope you're doing well today! 💖
+          <div v-if="stream.canManage">You could start streaming though…</div>
         </div>
       </section>
       <section class="chat-panel">
