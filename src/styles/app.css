@@ -85,23 +85,36 @@ a {
 }
 
 /**
- * .chat-panel is the main chat container. It uses a single grid area, to size
- * its content to its own full size.
+ * .chat-panel is the main chat container. It has a header area, and a content
+ * area.
  */
 .chat-panel {
   display: grid;
-  grid-template-areas: "the-single-area";
+  grid-template-rows: auto minmax(min-content, 1fr);
+  grid-template-areas:
+    "header"
+    "content";
   min-height: 100%;
 }
 
 /**
- * All three content types take up the whole .chat-panel, and are column flex
- * containers.
+ * The chat header sits above the main chat area, with settings etc.
+ */
+.chat-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 16px;
+}
+
+/**
+ * All three content types take up the whole chat content area, and are column
+ * flex containers.
  */
 .chat-main,
 .chat-loading-message,
 .chat-error-message {
-  grid-area: the-single-area;
+  grid-area: content;
   display: flex;
   flex-direction: column;
 }
@@ -130,19 +143,9 @@ a {
 }
 
 /**
- * The chat header sits above the main chat area, with settings etc.
- */
-.chat-main header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 8px 16px;
-}
-
-/**
  * The chat title should be large, but not as large as most h1s.
  */
-.chat-main header h1 {
+.chat-header h1 {
   font-size: 1.4em;
 }
 

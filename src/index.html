@@ -23,6 +23,28 @@
         </div>
       </section>
       <section class="chat-panel">
+        <header class="chat-header">
+          <h1>Chat</h1>
+          <form
+            class="display-name-form"
+            @submit="displayNameForm.submit"
+            v-if="chat.status === 'ready'"
+          >
+            <label>
+              <div>Display name</div>
+              <input
+                type="text"
+                v-model="displayNameForm.displayName"
+                v-bind:disabled="displayNameForm.isDisabled"
+                required
+                ref="displayNameInput"
+              />
+            </label>
+            <button type="submit" v-bind:disabled="displayNameForm.isDisabled">
+              Save
+            </button>
+          </form>
+        </header>
         <div
           class="chat-loading-message"
           v-if="chat.status === 'loading'"
@@ -64,28 +86,7 @@
           v-if="chat.status === 'ready'"
           v-show="hydrogenLoaded"
         >
-          <header>
-            <h1>Chat</h1>
-            <form class="display-name-form" @submit="displayNameForm.submit">
-              <label>
-                <div>Display name</div>
-                <input
-                  type="text"
-                  v-model="displayNameForm.displayName"
-                  v-bind:disabled="displayNameForm.isDisabled"
-                  required
-                  ref="displayNameInput"
-                />
-              </label>
-              <button
-                type="submit"
-                v-bind:disabled="displayNameForm.isDisabled"
-              >
-                Save
-              </button>
-            </form>
-          </header>
-          <div class="hydrogen" ref="hydrogen" @mounted="loadHydrogen"></div>
+          <div class="hydrogen" ref="hydrogen" @mounted="loadHydrogen" />
         </div>
       </section>
     </main>
