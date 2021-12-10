@@ -17,7 +17,7 @@
     "serve": "^13.0.2"
   },
   "scripts": {
-    "start": "PORT=1234 serve",
+    "start": "PORT=1234 serve ..",
     "build": "node build-dependencies.js"
   },
   "author": "Matchu",

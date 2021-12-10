@@ -23,7 +23,7 @@ await buildFilesAndPrintSummary({
       ).version
     ),
   },
-  outfile: "scripts/lib/hydrogen-web.js",
+  outfile: "../scripts/lib/hydrogen-web.js",
 });
 
 // Build hydrogen-web's CSS files
@@ -73,7 +73,7 @@ await buildFilesAndPrintSummary({
     "./node_modules/hydrogen-web/src/platform/web/ui/css/themes/element/inter/Inter-ThinItalic.woff?v=3.13",
     "./node_modules/hydrogen-web/src/platform/web/ui/css/themes/element/inter/Inter-ThinItalic.woff2?v=3.13",
   ],
-  outdir: "styles/lib/hydrogen-web",
+  outdir: "../styles/lib/hydrogen-web",
   plugins: [svg()],
 });
 
