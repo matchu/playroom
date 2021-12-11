@@ -16,7 +16,8 @@ export default class MatrixClient {
   async loginAsSavedSessionOrGuest() {
     // First, read the saved session, or create a guest session.
     this.state.session =
-      this._readSavedSession() || (await this._createGuestMatrixSession());
+      (await this._readSavedSession()) ||
+      (await this._createGuestMatrixSession());
 
     // Then, save the session in storage for next time.
     localStorage.setItem(
@@ -36,14 +37,14 @@ export default class MatrixClient {
     }
   }
 
-  _readSavedSession() {
+  async _readSavedSession() {
+    let session;
     try {
       const sessionString = localStorage.getItem("playroom-matrix-session");
-      if (sessionString) {
-        return JSON.parse(sessionString);
-      } else {
+      if (!sessionString) {
         return null;
       }
+      session = JSON.parse(sessionString);
     } catch (error) {
       console.warn(
         `[MatrixClient] Error reading saved session, skipping:`,
@@ -51,6 +52,31 @@ export default class MatrixClient {
       );
       return null;
     }
+
+    // Test the saved session. If it returns a 401 Unauthorized, ignore it and
+    // we'll create a new session instead.
+    //
+    // NOTE: This is kinda inefficient: it's a request where we don't actually
+    //       care about the response data. We could also check for the 401 on
+    //       the account setup requests we make immediately after? We'd need to
+    //       substantially refactor the current control flow though, because
+    //       we've currently wrapped account setup in consent retry logic.
+    try {
+      await this._api.get("/_matrix/client/v3/account/whoami", {
+        accessToken: session.accessToken,
+      });
+    } catch (error) {
+      if (error.responseStatus === 401) {
+        console.warn(
+          `[MatrixClient] Saved session is no longer authorized, ignoring.`,
+          error
+        );
+        return null;
+      }
+      throw error;
+    }
+
+    return session;
   }
 
   async _createGuestMatrixSession() {
