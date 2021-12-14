@@ -1,7 +1,8 @@
-import * as fs from "fs";
+import * as fs from "fs/promises";
 import * as path from "path";
 import { build, analyzeMetafile } from "esbuild";
 import svg from "esbuild-plugin-svg";
+import { gzip } from "pako";
 
 // Build hydrogen-web's JS files
 await buildFilesAndPrintSummary({
@@ -16,7 +17,7 @@ await buildFilesAndPrintSummary({
   define: {
     DEFINE_VERSION: JSON.stringify(
       JSON.parse(
-        fs.readFileSync(
+        await fs.readFile(
           path.join("node_modules/hydrogen-web/package.json"),
           "utf8"
         )
@@ -83,7 +84,12 @@ async function buildFilesAndPrintSummary(options) {
   // Print a summary of the files and their sizes.
   const { outputs } = result.metafile;
   for (const [filename, result] of Object.entries(outputs)) {
-    console.log(`${filename}: ${formatBytes(result.bytes)}`);
+    const content = await fs.readFile(filename, "utf8");
+    const gzippedContent = gzip(content);
+    console.log(
+      `${filename}: ${formatBytes(result.bytes)} ` +
+        `(${formatBytes(gzippedContent.byteLength)} gzipped)`
+    );
   }
 
   // If we ran `ANALYZE=1 npm run build`, explain the file size a bit more.

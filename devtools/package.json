@@ -14,6 +14,7 @@
     "esbuild": "^0.14.2",
     "esbuild-plugin-svg": "^0.1.0",
     "eslint": "^8.4.0",
+    "pako": "^2.0.4",
     "serve": "^13.0.2"
   },
   "scripts": {
