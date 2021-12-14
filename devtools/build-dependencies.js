@@ -8,6 +8,8 @@ import { gzip } from "pako";
 await buildFilesAndPrintSummary({
   entryPoints: ["node_modules/hydrogen-web/src/lib.ts"],
   bundle: true,
+  minify: true,
+  sourcemap: true,
   format: "esm",
   external: [
     "node-html-parser",
@@ -83,7 +85,9 @@ async function buildFilesAndPrintSummary(options) {
 
   // Print a summary of the files and their sizes.
   const { outputs } = result.metafile;
-  for (const [filename, result] of Object.entries(outputs)) {
+  const sortedFiles = Object.keys(outputs).sort();
+  for (const filename of sortedFiles) {
+    const result = outputs[filename];
     const content = await fs.readFile(filename, "utf8");
     const gzippedContent = gzip(content);
     console.log(
