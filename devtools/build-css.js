@@ -1,36 +1,8 @@
-import * as fs from "fs/promises";
-import * as path from "path";
-import { build, analyzeMetafile } from "esbuild";
+import { build } from "esbuild";
 import svg from "esbuild-plugin-svg";
-import { gzip } from "pako";
-
-// Build hydrogen-web's JS files
-await buildFilesAndPrintSummary({
-  entryPoints: ["node_modules/hydrogen-web/src/lib.ts"],
-  bundle: true,
-  minify: true,
-  sourcemap: true,
-  format: "esm",
-  external: [
-    "node-html-parser",
-    "fake-indexeddb/lib/FDBFactory.js",
-    "fake-indexeddb/lib/FDBKeyRange.js",
-  ],
-  define: {
-    DEFINE_VERSION: JSON.stringify(
-      JSON.parse(
-        await fs.readFile(
-          path.join("node_modules/hydrogen-web/package.json"),
-          "utf8"
-        )
-      ).version
-    ),
-  },
-  outfile: "../scripts/lib/hydrogen-web.js",
-});
 
 // Build hydrogen-web's CSS files
-await buildFilesAndPrintSummary({
+await build({
   entryPoints: [
     "hydrogen-web/src/platform/web/ui/css/main.css",
     "hydrogen-web/src/platform/web/ui/css/themes/element/theme.css",
@@ -79,38 +51,3 @@ await buildFilesAndPrintSummary({
   outdir: "../styles/lib/hydrogen-web",
   plugins: [svg()],
 });
-
-async function buildFilesAndPrintSummary(options) {
-  const result = await build({ ...options, metafile: true });
-
-  // Print a summary of the files and their sizes.
-  const { outputs } = result.metafile;
-  const sortedFiles = Object.keys(outputs).sort();
-  for (const filename of sortedFiles) {
-    const result = outputs[filename];
-    const content = await fs.readFile(filename, "utf8");
-    const gzippedContent = gzip(content);
-    console.log(
-      `${filename}: ${formatBytes(result.bytes)} ` +
-        `(${formatBytes(gzippedContent.byteLength)} gzipped)`
-    );
-  }
-
-  // If we ran `ANALYZE=1 npm run build`, explain the file size a bit more.
-  if (process.env["ANALYZE"]) {
-    console.log(await analyzeMetafile(result.metafile));
-  }
-}
-
-// https://stackoverflow.com/a/18650828/107415
-function formatBytes(bytes, decimals = 2) {
-  if (bytes === 0) return "0 Bytes";
-
-  const k = 1024;
-  const dm = decimals < 0 ? 0 : decimals;
-  const sizes = ["Bytes", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"];
-
-  const i = Math.floor(Math.log(bytes) / Math.log(k));
-
-  return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + " " + sizes[i];
-}
