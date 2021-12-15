@@ -1,4 +1,4 @@
-import Playroom from "./model/playroom.js";
+import Playroom from "./playroom.js";
 import { createApp } from "./lib/petite-vue.js";
 import DisplayNameForm from "./components/display-name-form.js";
 import Hydrogen from "./components/hydrogen.js";

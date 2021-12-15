@@ -1,18 +1,20 @@
-import { reactive } from "../lib/petite-vue.js";
-import MatrixClient from "./matrix-client.js";
+import { reactive } from "./lib/petite-vue.js";
+import {
+  ensureChatIsSetUpForCurrentUser,
+  setDisplayName,
+} from "./model/matrix-chat.js";
+import { loginAsSavedSessionOrGuest } from "./model/matrix-login.js";
+import { loadStreamState } from "./model/matrix-stream.js";
 
 export default class Playroom {
   constructor({ settings }) {
     this.settings = settings;
-    this._matrixClient = new MatrixClient({ settings });
 
-    const playroom = this;
     this.state = reactive({
+      session: null,
       chat: reactive({
         status: "loading",
-        get displayName() {
-          return playroom._matrixClient.state.displayName;
-        },
+        displayName: null,
       }),
       stream: reactive({
         status: "loading",
@@ -23,11 +25,12 @@ export default class Playroom {
   }
 
   async start() {
-    this.state.chat.status = "logging-in";
+    const { settings } = this;
 
-    // First, log into a Matrix session.
+    // First, log in, with a new guest session if needed.
     try {
-      await this._matrixClient.loginAsSavedSessionOrGuest();
+      this.state.chat.status = "logging-in";
+      this.state.session = await loginAsSavedSessionOrGuest({ settings });
     } catch (error) {
       console.error("[Playroom] Error logging in", error);
       this.state.chat.status = "login-error";
@@ -46,8 +49,15 @@ export default class Playroom {
   }
 
   async _ensureAccountIsReadyToChat() {
+    const { settings } = this;
+    const { session } = this.state;
+
     try {
-      await this._matrixClient.ensureAccountIsReadyToChat();
+      const { displayName } = await ensureChatIsSetUpForCurrentUser({
+        settings,
+        session,
+      });
+      this.state.chat.displayName = displayName;
     } catch (error) {
       // If this is a must-agree-to-terms error, show it on the UI, and try
       // again in 3 seconds (to see if they've agreed yet).
@@ -76,55 +86,38 @@ export default class Playroom {
   }
 
   async loadStreamState() {
-    const { powerLevelToManageWidgets, currentUserPowerLevel, widgetUrls } =
-      await this._matrixClient.getRoomState();
+    const { settings } = this;
+    const { session } = this.state;
 
-    const widgetPowerLevelIsSafe = powerLevelToManageWidgets > 0;
-    if (!widgetPowerLevelIsSafe && !this._hasSentPowerLevelWarning) {
+    const { canManage, securityWarning, videoEmbedUrl } = await loadStreamState(
+      { settings, session }
+    );
+
+    if (securityWarning != null && !this._hasSentPowerLevelWarning) {
       alert(
-        `WARNING: Your Matrix room is currently configured to let *anybody* ` +
-          `add and edit widgets.\n\nPlease fix this by setting the "Modify ` +
-          `widgets" setting (or "im.vector.modular.widgets" setting) to ` +
-          `require moderator access.\n\nTo prevent a stream hijack, we've ` +
+        `WARNING: ${securityWarning}\n\nTo prevent a stream hijack, we've ` +
           `disabled your stream until this is resolved. Sorry for the ` +
           `trouble, hope this makes sense! 💖 —The Playroom Devs`
       );
       this._hasSentPowerLevelWarning = true;
     }
 
-    const currentUserCanManageWidgets =
-      currentUserPowerLevel >= powerLevelToManageWidgets;
-    if (currentUserCanManageWidgets) {
-      this.state.stream.canManage = true;
-    }
+    this.state.stream.canManage = canManage;
 
-    // We use the URL of the first active widget in the room as our stream!
-    if (widgetPowerLevelIsSafe && widgetUrls.length >= 1) {
+    if (videoEmbedUrl != null && securityWarning == null) {
       this.state.stream.status = "live";
-      this.state.stream.videoEmbedUrl = widgetUrls[0];
+      this.state.stream.videoEmbedUrl = videoEmbedUrl;
     } else {
       this.state.stream.status = "idle";
       this.state.stream.videoEmbedUrl = null;
     }
   }
 
-  /**
-   * Returns the raw Matrix session data.
-   *
-   * This is escape hatch for integrations with Matrix UI libraries, like
-   * Hydrogen, who *need* the raw session to get *anything* done.
-   *
-   * In general, Playroom developers should prefer to handle Matrix logic
-   * inside this model class instead! That way, the app sees a generic Playroom
-   * API rather than anything Matrix-specific, which will enable us to refactor
-   * with minimal impact to the rest of the app and any customizations the
-   * Playroom owner may have made.
-   */
-  getMatrixSessionData() {
-    return this._matrixClient.state.session;
-  }
-
   async setDisplayName(newDisplayName) {
-    await this._matrixClient.setDisplayName(newDisplayName);
+    const { settings } = this;
+    const { session } = this.state;
+
+    await setDisplayName(newDisplayName, { settings, session });
+    this.state.chat.displayName = newDisplayName;
   }
 }

@@ -20,9 +20,7 @@ export default function Hydrogen({ playroom }) {
 
         // Set up Hydrogen with the new session…
         const hydrogenBridge = new HydrogenBridge(h, hydrogenContainer);
-        await hydrogenBridge.startWithExistingSession(
-          playroom.getMatrixSessionData()
-        );
+        await hydrogenBridge.startWithExistingSession(playroom.state.session);
 
         // …then load and mount the view.
         const view = await hydrogenBridge.createRoomView(
@@ -62,7 +60,7 @@ class HydrogenBridge {
     const sessionId = Math.floor(
       Math.random() * Number.MAX_SAFE_INTEGER
     ).toString();
-    const homeserverBaseUrlString = session.homeserverBaseUrl
+    const homeserverBaseUrlString = getHomeserverBaseUrl(session)
       .toString()
       .slice(0, -1);
     await this.platform.sessionInfoStorage.add({
@@ -122,6 +120,12 @@ class HydrogenBridge {
 
     return new this.h.RoomView(roomViewModel);
   }
+}
+
+function getHomeserverBaseUrl(session) {
+  const url = new URL("https://placeholder-host");
+  url.host = session.userId.split(":")[1];
+  return url;
 }
 
 // Monkey-patch syncing for compatibility with guest accounts.
