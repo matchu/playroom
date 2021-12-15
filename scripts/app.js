@@ -1,8 +1,8 @@
-import Playroom from "./playroom.js";
-import { createApp } from "./lib/petite-vue.js";
-import DisplayNameForm from "./components/display-name-form.js";
-import Hydrogen from "./components/hydrogen.js";
 import settings from "../settings.js";
+import { createApp } from "./lib/petite-vue.js";
+import Playroom from "./playroom/playroom.js";
+import DisplayNameForm from "./playroom/ui/display-name-form.js";
+import Hydrogen from "./playroom/ui/hydrogen.js";
 
 try {
   const playroom = new Playroom({ settings });

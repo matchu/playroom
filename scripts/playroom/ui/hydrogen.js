@@ -1,4 +1,4 @@
-import { effect, reactive } from "../lib/petite-vue.js";
+import { effect, reactive } from "../../lib/petite-vue.js";
 
 export default function Hydrogen({ playroom }) {
   const hydrogen = reactive({
@@ -12,7 +12,7 @@ export default function Hydrogen({ playroom }) {
         // We import Hydrogen asynchronously, so that it doesn't block the rest
         // of the app from setting up (and can probably download in parallel
         // with login). We preload it in `index.html` to give it a head start!
-        const h = await import("../lib/hydrogen-web.js");
+        const h = await import("../../lib/hydrogen-web.js");
 
         const hydrogenContainer = document.querySelector(
           ".playroom-root .hydrogen"

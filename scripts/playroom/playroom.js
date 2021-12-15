@@ -1,10 +1,10 @@
-import { reactive } from "./lib/petite-vue.js";
+import { reactive } from "../lib/petite-vue.js";
 import {
   ensureChatIsSetUpForCurrentUser,
   setDisplayName,
-} from "./model/matrix-chat.js";
-import { loginAsSavedSessionOrGuest } from "./model/matrix-login.js";
-import { loadStreamState } from "./model/matrix-stream.js";
+} from "./data-sources/matrix/chat.js";
+import { loginAsSavedSessionOrGuest } from "./data-sources/matrix/login.js";
+import { loadStreamState } from "./data-sources/matrix/stream.js";
 
 export default class Playroom {
   constructor({ settings }) {

@@ -1,4 +1,4 @@
-import { reactive } from "../lib/petite-vue.js";
+import { reactive } from "../../lib/petite-vue.js";
 
 export default function DisplayNameForm({ playroom }) {
   return reactive({

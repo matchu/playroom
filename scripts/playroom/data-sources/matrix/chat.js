@@ -1,4 +1,4 @@
-import { get, post, put } from "./matrix-api.js";
+import { get, post, put } from "./api.js";
 
 export async function ensureChatIsSetUpForCurrentUser({ settings, session }) {
   // (We set display name before joining, to avoid a "user changed their

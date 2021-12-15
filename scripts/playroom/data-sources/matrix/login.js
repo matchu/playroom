@@ -1,4 +1,4 @@
-import { get, post } from "./matrix-api.js";
+import { get, post } from "./api.js";
 
 export async function loginAsSavedSessionOrGuest({ settings }) {
   // First, read the saved session, or create a guest session.

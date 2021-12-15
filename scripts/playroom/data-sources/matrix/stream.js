@@ -1,4 +1,4 @@
-import { get } from "./matrix-api.js";
+import { get } from "./api.js";
 
 export async function loadStreamState({ settings, session }) {
   const { roomId } = settings.matrix;
