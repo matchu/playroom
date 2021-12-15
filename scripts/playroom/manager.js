@@ -6,7 +6,7 @@ import {
 import { loginAsSavedSessionOrGuest } from "./data-sources/matrix/login.js";
 import { loadStreamState } from "./data-sources/matrix/stream.js";
 
-export default class Playroom {
+export default class PlayroomManager {
   constructor({ settings }) {
     this.settings = settings;
 

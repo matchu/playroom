@@ -1,12 +1,12 @@
 import settings from "../settings.js";
 import { createApp } from "./lib/petite-vue.js";
-import Playroom from "./playroom/playroom.js";
+import PlayroomManager from "./playroom/manager.js";
 import DisplayNameForm from "./playroom/ui/display-name-form.js";
 import Hydrogen from "./playroom/ui/hydrogen.js";
 
 try {
-  const playroom = new Playroom({ settings });
-
+  const playroom = new PlayroomManager({ settings });
+  playroom.start();
   createApp({
     chat: playroom.state.chat,
     stream: playroom.state.stream,
@@ -15,8 +15,6 @@ try {
       hydrogen: Hydrogen({ playroom }),
     },
   }).mount();
-
-  playroom.start();
 } catch (error) {
   console.error(error);
   alert(
