@@ -9,6 +9,7 @@ import {
 } from "./data-sources/matrix/chat.js";
 import {
   createGuestSession,
+  loginWithPassword,
   validateSession,
 } from "./data-sources/matrix/login.js";
 import { loadStreamState } from "./data-sources/matrix/stream.js";
@@ -79,6 +80,23 @@ export default class PlayroomManager {
       this.state.chat.status = "login-error";
       return;
     }
+  }
+
+  async loginAsAdmin({ userId, password }) {
+    const { settings } = this;
+    const session = await loginWithPassword({ userId, password, settings });
+
+    // For now, we're defining "admin" as "can manage the stream".
+    const { canManage } = await loadStreamState({ settings, session });
+    if (!canManage) {
+      throw new Error(
+        `Login was successful, but is not an admin account. (It doesn't have ` +
+          `permission to manage the stream.)`
+      );
+    }
+
+    // If the login was successful, save it as our new session!
+    await writeSavedSession(session);
   }
 
   async _ensureAccountIsReadyToChat() {
