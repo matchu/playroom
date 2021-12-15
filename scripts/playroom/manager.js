@@ -90,8 +90,8 @@ export default class PlayroomManager {
     const { canManage } = await loadStreamState({ settings, session });
     if (!canManage) {
       throw new Error(
-        `Login was successful, but is not an admin account. (It doesn't have ` +
-          `permission to manage the stream.)`
+        `Your password is correct, but this isn't an admin account: it ` +
+          `doesn't have permission to manage the stream.`
       );
     }
 
