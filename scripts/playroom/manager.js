@@ -113,17 +113,10 @@ export default class PlayroomManager {
       // If this is a must-agree-to-terms error, show it on the UI, and try
       // again in 3 seconds (to see if they've agreed yet).
       if (error.termsUrl) {
-        try {
-          this.state.chat.status = "must-agree-to-terms";
-          this.state.chat.termsUrl = error.termsUrl;
-          setTimeout(() => this._ensureAccountIsReadyToChat(), 3000);
-          return;
-        } catch (error2) {
-          console.warn(
-            `Could not show terms prompt, showing generic error instead`,
-            error2
-          );
-        }
+        this.state.chat.status = "must-agree-to-terms";
+        this.state.chat.termsUrl = error.termsUrl;
+        setTimeout(() => this._ensureAccountIsReadyToChat(), 3000);
+        return;
       }
 
       // Otherwise, show a generic error message.
