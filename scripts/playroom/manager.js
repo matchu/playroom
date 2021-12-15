@@ -1,9 +1,16 @@
 import { reactive } from "../lib/petite-vue.js";
 import {
+  readSavedSession,
+  writeSavedSession,
+} from "./data-sources/local-device.js";
+import {
   ensureChatIsSetUpForCurrentUser,
   setDisplayName,
 } from "./data-sources/matrix/chat.js";
-import { loginAsSavedSessionOrGuest } from "./data-sources/matrix/login.js";
+import {
+  createGuestSession,
+  validateSession,
+} from "./data-sources/matrix/login.js";
 import { loadStreamState } from "./data-sources/matrix/stream.js";
 
 export default class PlayroomManager {
@@ -25,27 +32,53 @@ export default class PlayroomManager {
   }
 
   async start() {
-    const { settings } = this;
-
     // First, log in, with a new guest session if needed.
-    try {
-      this.state.chat.status = "logging-in";
-      this.state.session = await loginAsSavedSessionOrGuest({ settings });
-    } catch (error) {
-      console.error("[Playroom] Error logging in", error);
-      this.state.chat.status = "login-error";
-      return;
-    }
+    await this._loginAsSavedSessionOrGuest();
 
     // Then, start loading stream state. We don't wait, we just get started!
     // We also set it up to automatically reload every 10 seconds.
-    this.loadStreamState();
-    setInterval(() => this.loadStreamState(), 10000);
+    //
+    // NOTE: This happens after login, because the Matrix requires a session to
+    //       load room data, even though it's public.
+    this._loadStreamState();
+    setInterval(() => this._loadStreamState(), 10000);
 
     // Finally, start getting the account ready to chat. It will set state when
     // it's done! (This has its own internal error handling, to loop in the
     // case of a terms error!)
     this._ensureAccountIsReadyToChat();
+  }
+
+  async _loginAsSavedSessionOrGuest() {
+    const { settings } = this;
+
+    try {
+      this.state.chat.status = "logging-in";
+
+      // First, try using the saved session, if any.
+      let session = await readSavedSession();
+      const savedSessionIsValid =
+        session != null && (await validateSession({ settings, session }));
+      if (session != null && !savedSessionIsValid) {
+        console.warn(
+          `Saved Playroom session was invalid, creating new session instead`,
+          session
+        );
+      }
+
+      // If there's no saved session, or it's invalid, create a new guest
+      // session and save it.
+      if (!savedSessionIsValid) {
+        session = await createGuestSession({ settings });
+        await writeSavedSession(session);
+      }
+
+      this.state.session = session;
+    } catch (error) {
+      console.error("[Playroom] Error logging in", error);
+      this.state.chat.status = "login-error";
+      return;
+    }
   }
 
   async _ensureAccountIsReadyToChat() {
@@ -85,7 +118,7 @@ export default class PlayroomManager {
     this.state.chat.status = "logged-in";
   }
 
-  async loadStreamState() {
+  async _loadStreamState() {
     const { settings } = this;
     const { session } = this.state;
 
