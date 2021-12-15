@@ -33,19 +33,22 @@
           <h1>Chat</h1>
           <form
             class="display-name-form"
-            @submit="displayNameForm.submit"
+            @submit="ui.displayNameForm.submit"
             v-if="chat.status === 'logged-in'"
           >
             <label>
               <div>Display name</div>
               <input
                 type="text"
-                v-model="displayNameForm.displayName"
-                v-bind:disabled="displayNameForm.isDisabled"
+                v-model="ui.displayNameForm.displayName"
+                v-bind:disabled="ui.displayNameForm.isDisabled"
                 required
               />
             </label>
-            <button type="submit" v-bind:disabled="displayNameForm.isDisabled">
+            <button
+              type="submit"
+              v-bind:disabled="ui.displayNameForm.isDisabled"
+            >
               Save
             </button>
           </form>
@@ -68,7 +71,7 @@
           class="chat-loading-message"
           v-if="
             chat.status === 'logging-in' ||
-              (chat.status === 'logged-in' && hydrogen.status === 'loading')
+              (chat.status === 'logged-in' && ui.hydrogen.status === 'loading')
           "
         >
           <div>Logging in…</div>
@@ -100,7 +103,7 @@
           The .hydrogen element inside here is a special element, where
           Hydrogen will mount once we're logged in.
         -->
-        <div class="chat-main" v-show="hydrogen.status === 'ready'">
+        <div class="chat-main" v-show="ui.hydrogen.status === 'ready'">
           <div class="hydrogen" />
         </div>
       </section>

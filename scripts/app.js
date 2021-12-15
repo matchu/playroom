@@ -10,8 +10,10 @@ try {
   createApp({
     chat: playroom.state.chat,
     stream: playroom.state.stream,
-    displayNameForm: DisplayNameForm({ playroom }),
-    hydrogen: Hydrogen({ playroom }),
+    ui: {
+      displayNameForm: DisplayNameForm({ playroom }),
+      hydrogen: Hydrogen({ playroom }),
+    },
   }).mount();
 
   playroom.start();
