@@ -15,17 +15,33 @@
   <body>
     <main class="playroom-root" v-scope>
       <section class="stream-panel">
-        <iframe
-          v-bind:src="stream.videoEmbedUrl"
-          v-if="stream.status === 'live'"
-          title="Stream video content"
-          frameborder="0"
-          allow="clipboard-write; encrypted-media; picture-in-picture"
-          allowfullscreen
-        ></iframe>
-        <div class="stream-idle-indicator" v-if="stream.status === 'idle'">
-          No stream right now! Hope you're doing well today! 💖
-          <div v-if="stream.canManage">You could start streaming though…</div>
+        <div class="stream-controls" v-if="stream.canManage">
+          <button v-if="stream.status === 'idle'">Start stream</button>
+          <button v-if="stream.status === 'live'">End stream</button>
+        </div>
+        <div class="stream-content">
+          <iframe
+            v-bind:src="stream.videoEmbedUrl"
+            v-if="stream.status === 'live'"
+            title="Stream video content"
+            frameborder="0"
+            allow="clipboard-write; encrypted-media; picture-in-picture"
+            allowfullscreen
+          ></iframe>
+          <div class="stream-idle-indicator" v-if="stream.status === 'idle'">
+            <!--
+              We wait for chat to log in before showing the welcome message for
+              the streamer, so we have their display name ready! (But we still
+              have the fallback text "friend" if there's none, just in case.)
+            -->
+            <div v-if="stream.canManage && chat.status === 'logged-in'">
+              Hey {{chat.displayName || "friend"}}, it's you!! Ready to stream?
+              ✨
+            </div>
+            <div v-if="!stream.canManage">
+              No stream right now! Hope you're doing well today! 💖
+            </div>
+          </div>
         </div>
       </section>
       <section class="chat-panel">
