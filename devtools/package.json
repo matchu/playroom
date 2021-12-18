@@ -13,6 +13,7 @@
     "@rollup/plugin-commonjs": "^21.0.1",
     "@rollup/plugin-node-resolve": "^13.1.1",
     "@rollup/plugin-typescript": "^8.3.0",
+    "browser-sync": "^2.27.7",
     "buffer": "^6.0.3",
     "esbuild": "^0.14.2",
     "esbuild-plugin-svg": "^0.1.0",
@@ -21,12 +22,11 @@
     "pako": "^2.0.4",
     "rollup": "^2.61.1",
     "rollup-plugin-terser": "^7.0.2",
-    "serve": "^13.0.2",
     "tslib": "^2.3.1",
     "typescript": "^4.5.4"
   },
   "scripts": {
-    "start": "PORT=1234 serve ..",
+    "start": "browser-sync start --port=1234 --server=.. --files=.. --ignore=. --ignore=../.git --ignore=../node_modules",
     "build-js": "rollup -c",
     "build-css": "node build-css.js",
     "analyze": "node analyze.js",
