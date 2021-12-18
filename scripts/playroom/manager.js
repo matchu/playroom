@@ -60,7 +60,7 @@ export default class PlayroomManager {
       let session = await readSavedSession();
       const savedSessionIsValid =
         session != null && (await validateSession({ settings, session }));
-      if (session != null && !savedSessionIsValid) {
+      if (!savedSessionIsValid) {
         console.warn(
           `Saved Playroom session was invalid, creating new session instead`,
           session
