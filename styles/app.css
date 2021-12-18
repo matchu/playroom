@@ -76,6 +76,7 @@ a {
 .stream-controls {
   grid-area: controls;
   background: #336;
+  color: white;
   padding: 0.5em 1em;
   display: flex;
   flex-direction: row;
@@ -89,10 +90,47 @@ a {
 .stream-content {
   grid-area: content;
   background: #223;
+  color: white;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
+}
+
+/**
+ * The stream state form lets you start or end the stream.
+ */
+.stream-state-form {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 0.5em;
+}
+
+/**
+ * The embed HTML input and its label are arranged as a row.
+ */
+.stream-state-form label {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 0.5em;
+}
+
+/**
+ * Add a colon after the Embed HTML label.
+ */
+.stream-state-form label > div::after {
+  content: ":";
+}
+
+/**
+ * The Embed HTML input has smaller font size, because HTML looks annoying and
+ * code-y and there's a lot of it. But extra padding to make up for it!
+ */
+.stream-state-form input[name="videoEmbedHtml"] {
+  font-size: 0.8em;
+  padding: 0.25em;
 }
 
 /**
@@ -107,7 +145,6 @@ a {
  * The stream idle indicator appears when there's no stream.
  */
 .stream-idle-indicator {
-  color: white;
   text-align: center;
 }
 

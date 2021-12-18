@@ -3,6 +3,7 @@ import { createApp } from "./lib/petite-vue.js";
 import PlayroomManager from "./playroom/manager.js";
 import DisplayNameForm from "./playroom/ui/display-name-form.js";
 import Hydrogen from "./playroom/ui/hydrogen.js";
+import StreamStateForm from "./playroom/ui/stream-state-form.js";
 
 try {
   const playroom = new PlayroomManager({ settings });
@@ -12,6 +13,7 @@ try {
     stream: playroom.state.stream,
     ui: {
       displayNameForm: DisplayNameForm({ playroom }),
+      streamStateForm: StreamStateForm({ playroom }),
       hydrogen: Hydrogen({ playroom }),
     },
   }).mount();

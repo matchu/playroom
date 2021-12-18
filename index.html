@@ -16,8 +16,31 @@
     <main class="playroom-root" v-scope>
       <section class="stream-panel">
         <div class="stream-controls" v-if="stream.canManage">
-          <button v-if="stream.status === 'idle'">Start stream</button>
-          <button v-if="stream.status === 'live'">End stream</button>
+          <form class="stream-state-form" v-if="stream.status === 'idle'">
+            <label>
+              <div>Embed HTML</div>
+              <input
+                type="text"
+                name="videoEmbedHtml"
+                v-model="ui.streamStateForm.videoEmbedHtml"
+                v-bind:disabled="stream.status === 'live'"
+                placeholder='<iframe src="https://www.youtube.com/embed/QCG98StBDfQ" …></iframe>'
+              />
+            </label>
+            <button
+              v-if="stream.status === 'idle'"
+              @click="ui.streamStateForm.start"
+            >
+              Start stream
+            </button>
+            <button
+              type="submit"
+              v-if="stream.status === 'live'"
+              @click="ui.streamStateForm.stop"
+            >
+              End stream
+            </button>
+          </form>
         </div>
         <div class="stream-content">
           <iframe
@@ -56,6 +79,7 @@
               <div>Display name</div>
               <input
                 type="text"
+                name="displayName"
                 v-model="ui.displayNameForm.displayName"
                 v-bind:disabled="ui.displayNameForm.isDisabled"
                 required
