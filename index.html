@@ -18,13 +18,13 @@
         <div class="stream-controls" v-if="stream.canManage">
           <form class="stream-state-form" v-if="stream.status === 'idle'">
             <label>
-              <div>Embed HTML</div>
+              <div>Stream URL</div>
               <input
                 type="text"
-                name="videoEmbedHtml"
-                v-model="ui.streamStateForm.videoEmbedHtml"
+                name="streamPageUrl"
+                v-model="ui.streamStateForm.streamPageUrl"
                 v-bind:disabled="stream.status === 'live'"
-                placeholder='<iframe src="https://www.youtube.com/embed/QCG98StBDfQ" …></iframe>'
+                placeholder="https://www.youtube.com/watch?v=QCG98StBDfQ"
               />
             </label>
             <button

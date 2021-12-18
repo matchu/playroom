@@ -164,4 +164,6 @@ export default class PlayroomManager {
     await setDisplayName(newDisplayName, { settings, session });
     this.state.chat.displayName = newDisplayName;
   }
+
+  async startStream(videoEmbedUrl) {}
 }

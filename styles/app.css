@@ -118,17 +118,17 @@ a {
 }
 
 /**
- * Add a colon after the Embed HTML label.
+ * Add a colon after the Stream URL label.
  */
 .stream-state-form label > div::after {
   content: ":";
 }
 
 /**
- * The Embed HTML input has smaller font size, because HTML looks annoying and
+ * The Stream URL input has smaller font size, because URLs looks annoying and
  * code-y and there's a lot of it. But extra padding to make up for it!
  */
-.stream-state-form input[name="videoEmbedHtml"] {
+.stream-state-form input[name="streamPageUrl"] {
   font-size: 0.8em;
   padding: 0.25em;
 }
