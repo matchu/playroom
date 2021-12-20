@@ -16,27 +16,28 @@
     <main class="playroom-root" v-scope>
       <section class="stream-panel">
         <div class="stream-controls" v-if="stream.canManage">
-          <form class="stream-state-form" v-if="stream.status === 'idle'">
+          <form class="stream-state-form">
             <label>
               <div>Stream URL</div>
               <input
                 type="text"
                 name="streamPageUrl"
                 v-model="ui.streamStateForm.streamPageUrl"
-                v-bind:disabled="stream.status === 'live'"
+                v-bind:readonly="(stream.status === 'live' || ui.streamStateForm.isSaving) ? true : undefined"
                 placeholder="https://www.youtube.com/watch?v=QCG98StBDfQ"
               />
             </label>
             <button
               v-if="stream.status === 'idle'"
-              @click="ui.streamStateForm.start"
+              @click="ui.streamStateForm.startStream"
+              v-bind:disabled="ui.streamStateForm.isSaving"
             >
               Start stream
             </button>
             <button
               type="submit"
               v-if="stream.status === 'live'"
-              @click="ui.streamStateForm.stop"
+              @click="ui.streamStateForm.endStream"
             >
               End stream
             </button>

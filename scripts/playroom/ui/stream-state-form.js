@@ -2,10 +2,17 @@ import { reactive } from "../../lib/petite-vue.js";
 
 export default function StreamStateForm({ playroom }) {
   return reactive({
-    streamPageUrl: "",
+    _localStreamPageUrl: null,
     isSaving: false,
 
-    async start(event) {
+    get streamPageUrl() {
+      return this._localStreamPageUrl || playroom.state.stream.videoEmbedUrl;
+    },
+    set streamPageUrl(newStreamPageUrl) {
+      this._localStreamPageUrl = newStreamPageUrl;
+    },
+
+    async startStream(event) {
       event.preventDefault();
       this.isSaving = true;
 
@@ -13,7 +20,7 @@ export default function StreamStateForm({ playroom }) {
         const videoEmbedUrl = await getVideoEmbedUrlFromStreamPageUrl(
           this.streamPageUrl
         );
-        alert(`TODO: Start stream at ${videoEmbedUrl}`);
+        await playroom.startStream({ videoEmbedUrl });
       } catch (error) {
         console.error(error);
         alert(
@@ -25,16 +32,16 @@ export default function StreamStateForm({ playroom }) {
       this.isSaving = false;
     },
 
-    async stop(event) {
+    async endStream(event) {
       event.preventDefault();
       this.isSaving = true;
 
       try {
-        alert("TODO: Stop the stream!");
+        await playroom.endStream();
       } catch (error) {
         console.error(error);
         alert(
-          `Couldn't stop the stream, sorry! See the browser console for ` +
+          `Couldn't end the stream, sorry! See the browser console for ` +
             `details.\n\n${error.message}`
         );
       }

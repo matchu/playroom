@@ -1,4 +1,4 @@
-import { get } from "./api.js";
+import { get, put } from "./api.js";
 
 export async function loadStreamState({ settings, session }) {
   const { roomId } = settings.matrix;
@@ -24,30 +24,37 @@ export async function loadStreamState({ settings, session }) {
         `require moderator access.`
       : null;
 
-  // NOTE: I'm basing my widget stuff on the widgets API RFC that seems to be
-  // what Element and Synapse are using-ish. The main difference seems to be
-  // that the widget type is still proprietary instead of `m.widget`. I'm not
-  // gonna add `m.widget` support until it gets into the actual spec!
-  //
-  // https://docs.google.com/document/d/1uPF7XWY_dXTKVKV7jZQ2KmsI19wn9-kFRgQ1tFQP7wQ/edit#heading=h.ll7aaslz33ov
-  const widgetEvents = roomEvents.filter(
-    (event) => event.type === "im.vector.modular.widgets"
+  const broadcastEvent = roomEvents.find(
+    (e) =>
+      e.type === "dev.playroom.broadcast" && e.state_key === "currentBroadcast"
   );
-  const widgetUrls = widgetEvents
-    .map((event) => event.content?.url)
-    // Widgets that were removed will still have events, but no content.
-    // Ignore them.
-    .filter((url) => url != null && isValidUrl(url));
-  const videoEmbedUrl = widgetUrls[0] || null;
+  const videoEmbedUrl = broadcastEvent?.content?.videoEmbedUrl || null;
 
   return { canManage, securityWarning, videoEmbedUrl };
 }
 
-function isValidUrl(url) {
-  try {
-    new URL(url);
-  } catch (error) {
-    return false;
-  }
-  return true;
+export async function startStream({ videoEmbedUrl }, { settings, session }) {
+  await put(
+    `/_matrix/client/v3/rooms/${settings.matrix.roomId}/state` +
+      `/dev.playroom.broadcast/currentBroadcast`,
+    {
+      settings,
+      session,
+      body: {
+        videoEmbedUrl,
+      },
+    }
+  );
+}
+
+export async function endStream({ settings, session }) {
+  await put(
+    `/_matrix/client/v3/rooms/${settings.matrix.roomId}/state` +
+      `/dev.playroom.broadcast/currentBroadcast`,
+    {
+      settings,
+      session,
+      body: {},
+    }
+  );
 }

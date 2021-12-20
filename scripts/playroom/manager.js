@@ -12,7 +12,11 @@ import {
   loginWithPassword,
   validateSession,
 } from "./data-sources/matrix/login.js";
-import { loadStreamState } from "./data-sources/matrix/stream.js";
+import {
+  endStream,
+  loadStreamState,
+  startStream,
+} from "./data-sources/matrix/stream.js";
 
 export default class PlayroomManager {
   constructor({ settings }) {
@@ -165,5 +169,19 @@ export default class PlayroomManager {
     this.state.chat.displayName = newDisplayName;
   }
 
-  async startStream(videoEmbedUrl) {}
+  async startStream(broadcastData) {
+    const { settings } = this;
+    const { session } = this.state;
+
+    await startStream(broadcastData, { settings, session });
+    await this._loadStreamState();
+  }
+
+  async endStream() {
+    const { settings } = this;
+    const { session } = this.state;
+
+    await endStream({ settings, session });
+    await this._loadStreamState();
+  }
 }
