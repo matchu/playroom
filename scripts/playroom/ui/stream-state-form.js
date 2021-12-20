@@ -17,9 +17,11 @@ export default function StreamStateForm({ playroom }) {
       this.isSaving = true;
 
       try {
-        const videoEmbedUrl = await getVideoEmbedUrlFromStreamPageUrl(
-          this.streamPageUrl
+        const safeStreamPageUrl = filterStreamPageUrl(this.streamPageUrl);
+        const unsafeVideoEmbedUrl = await getVideoEmbedUrlFromStreamPageUrl(
+          safeStreamPageUrl
         );
+        const videoEmbedUrl = filterVideoEmbedUrl(unsafeVideoEmbedUrl);
         await playroom.startStream({ videoEmbedUrl });
       } catch (error) {
         console.error(error);
@@ -128,7 +130,7 @@ async function getVideoEmbedUrlFromStreamPageUrl(streamPageUrl) {
 
   // Finally, just use the stream URL as given. Maybe they gave us the embed
   // URL from the iframe embed code!
-  return validateHttpUrl(streamPageUrl);
+  return streamPageUrl;
 }
 
 async function getVideoEmbedUrlFromOEmbedUrl(oEmbedUrl) {
@@ -163,18 +165,49 @@ function getVideoEmbedUrlFromEmbedHtml(videoEmbedHtml) {
     );
   }
 
-  return validateHttpUrl(iframe.getAttribute("src"));
+  return iframe.getAttribute("src");
 }
 
-function validateHttpUrl(url) {
+function filterStreamPageUrl(url) {
+  let parsedUrl;
   try {
-    const parsedUrl = new URL(url);
-    if (parsedUrl.protocol !== "http:" && parsedUrl.protocol !== "https:") {
-      throw new Error(`URL must be HTTP or HTTPS`);
-    }
+    parsedUrl = new URL(url);
   } catch (error) {
     throw new Error(`Invalid URL: ${error.message}: ${url}`);
   }
 
-  return url;
+  if (parsedUrl.protocol !== "http:" && parsedUrl.protocol !== "https:") {
+    throw new Error(`URL must be HTTP or HTTPS`);
+  }
+
+  // Rewrite youtu.be redirect URLs, because we won't be able to follow them
+  // for oEmbed correctly.
+  if (parsedUrl.hostname === "youtu.be") {
+    return (
+      `https://www.youtube.com/watch?v=` +
+      `${encodeURIComponent(parsedUrl.pathname.split("/")[1])}`
+    );
+  }
+
+  return parsedUrl.toString();
+}
+
+function filterVideoEmbedUrl(url) {
+  let parsedUrl;
+  try {
+    parsedUrl = new URL(url);
+  } catch (error) {
+    throw new Error(`Invalid URL: ${error.message}: ${url}`);
+  }
+
+  if (parsedUrl.protocol !== "http:" && parsedUrl.protocol !== "https:") {
+    throw new Error(`URL must be HTTP or HTTPS`);
+  }
+
+  // Use privacy-enhanced mode for Youtube URLs.
+  if (parsedUrl.hostname === "www.youtube.com") {
+    parsedUrl.hostname = "www.youtube-nocookie.com";
+  }
+
+  return parsedUrl.toString();
 }
